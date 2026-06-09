@@ -1,4 +1,5 @@
 # FINAL VERDICT — FINAL_DISCLOSURE_v2.md Verification Sweep
+**Author:** k4w_wak
 
 **Date:** 2026-06-07  
 **Verifier:** grok-verify (automated)  

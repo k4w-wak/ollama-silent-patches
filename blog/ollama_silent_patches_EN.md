@@ -1,6 +1,6 @@
 # Ollama's Silent Patching Problem: 9 Vulnerabilities, Zero CVEs, Zero Advisories
 
-**By: Anonymous Security Researcher | Date: June 8, 2026 | Reading time: 18 minutes**
+**By: k4w_wak | Date: June 8, 2026 | Reading time: 18 minutes**
 
 ---
 

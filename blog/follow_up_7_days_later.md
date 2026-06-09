@@ -1,6 +1,6 @@
 # 7 Days Later: Ollama's Response to Our Disclosure Was… More Silent Patches
 
-**By: Anonymous Security Researcher | Date: June 9, 2026 | Reading time: 12 minutes**
+**By: k4w_wak | Date: June 9, 2026 | Reading time: 12 minutes**
 
 ---
 

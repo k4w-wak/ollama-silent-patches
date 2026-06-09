@@ -6,6 +6,7 @@
 **Classification:** Public — Coordinated Disclosure  
 **Affected Software:** Ollama v0.17.1 through v0.30.6  
 **Repository:** https://github.com/ollama/ollama  
+**Author:** [k4w_wak](https://github.com/k4w-wak) | [Medium](https://medium.com/@k4w_wak_21591)
 **Stars:** 173,000+  
 **Estimated Exposed Instances:** 25,000–175,000+  
 

@@ -1,6 +1,6 @@
 # Ollamas Tavse Rettelses-Problem: 9 Sårbarheder, Nul CVEs, Nul Advisories
 
-**Af: Anonym Sikkerhedsforsker | Dato: 7. juni 2026 | Læsetid: 18 minutter**
+**Af: k4w_wak | Dato: 7. juni 2026 | Læsetid: 18 minutter**
 
 ---
 
