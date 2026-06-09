@@ -1,0 +1,12 @@
+#!/bin/bash
+echo "============================================================"
+echo "  Baichuan AI CORS Verification — api.baichuan-ai.com"
+echo "============================================================"
+echo ""
+echo "[1] Origin + DELETE Method:"
+curl -sI -H "Origin: https://evil.com" -X OPTIONS -H "Access-Control-Request-Method: DELETE" https://api.baichuan-ai.com/v1/chat/completions | grep -i "access-control"
+echo ""
+echo "[2] Null Origin:"
+curl -sI -H "Origin: null" https://api.baichuan-ai.com/v1/chat/completions | grep -i "access-control"
+echo ""
+echo "============================================================"
