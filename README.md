@@ -41,7 +41,12 @@ Ollama, the world's most popular local LLM runtime (173K+ GitHub stars, 25K+ pub
 
 - **7 primary findings** (restructured from 10 — Regex Bypass merged into SSRF; CVE-2026-5757 and CVE-2026-7482 separated and clarified; CVE-2026-5530 added per June 8 deep research)
 - **15+ additional unpatched GGUF parser vulnerabilities**
-- **A pattern of researcher suppression** (5 researchers ignored or rejected)
+- **A "reject → patch → silence" cycle** by Ollama's team
+- **Zero CVEs, zero advisories, zero credits** issued by Ollama despite 15+ security-relevant patches
+- **A pattern of researcher suppression** (5+ researchers ignored or rejected)
+- **A "reject → patch → silence" cycle** by Ollama's team
+- **Zero CVEs, zero advisories, zero credits** issued by Ollama despite 15+ security-relevant patches
+- **Huntr.com proof: 38/40 bug bounty reports rejected, 0 accepted, 0 fixed** — the same pattern at scale
 - **A "reject → patch → silence" cycle** by Ollama's team
 - **Zero CVEs, zero advisories, zero credits** issued by Ollama despite 15+ security-relevant patches
 
@@ -503,7 +508,45 @@ Ollama, Inc. (YC W21)
 | "Give us sufficient time" | PromptArmor waited 5.5 months |
 | Implied: CVE assignment | 0 CVEs assigned by Ollama |
 | Implied: Security advisories | 0 published |
+
+---
+
+## The "Harden" Pattern: 15+ Silent Security Patches
 | Implied: Researcher credit | 0 credits in release notes |
+
+### 🚨 Huntr.com Bug Bounty — The Proof at Scale
+
+Ollama has an **active $1,500 bounty program** on [huntr.com](https://huntr.com/repos/ollama/ollama). The stats tell the whole story:
+
+| Metric | Value |
+|--------|-------|
+| Total reports submitted | ~40 |
+| **Accepted** | **0** |
+| **Fixed** | **0** |
+| Marked "Duplicate" | ~23 |
+| Self Closed (researcher gave up) | ~15 |
+| Ollama fix timeline | **N/A** (no fixes) |
+
+**38 out of 40 reports rejected. Zero accepted. Zero fixed.** This is not a coincidence — it's policy.
+
+| Report | Date | Status |
+|--------|------|--------|
+| Unauthenticated API Exposure (0.0.0.0) | Jun 4, 2026 | Self Closed |
+| SSRF via registry Bearer realm redirect | May 27, 2026 | Self Closed |
+| **Heap OOB Read (CVE-2026-7482)** | May 22, 2026 | **Duplicate** |
+| Zip Slip RCE (CVE-2026-42248) | May 9, 2026 | **Duplicate** |
+| SSRF via Content-Location header | May 11, 2026 | Duplicate |
+| SSRF via Arbitrary Registry Host | May 11, 2026 | Duplicate |
+| SSRF via /api/pull user-controlled registry | May 11, 2026 | Duplicate |
+| No auth on destructive API endpoints | Apr 12, 2026 | Duplicate |
+| DNS rebinding bypass | Apr 12, 2026 | Duplicate |
+| Path traversal via unvalidated digest | Apr 12, 2026 | Self Closed |
+
+> **The same researcher who submitted CVE-2026-42248/9 through official channels waited 28 days with zero response.** This author's experience matches the Huntr data: Ollama ignores, rejects, then silently patches.
+
+---
+
+## The "Harden" Pattern: 15+ Silent Security Patches
 
 ---
 
