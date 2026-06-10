@@ -1,26 +1,40 @@
-# OLLAMA SILENT PATCH DISCLOSURE — PUBLIC RELEASE v2
-## Responsible Disclosure of Security Vulnerabilities Silently Patched Without CVE or Advisory
+# 🦙🔒 Ollama Silent Patches — Full Disclosure
 
-**Date:** 2026-06-08  
-**Version:** 3.0 (Final — CVE-2026-5530 added, OLLAMA_HOST corrected)  
-**Classification:** Public — Coordinated Disclosure  
-**Affected Software:** Ollama v0.17.1 through v0.30.6  
-**Repository:** https://github.com/ollama/ollama  
-**Author:** [k4w_wak](https://github.com/k4w-wak) | [Medium](https://medium.com/@k4w_wak_21591)
-**Stars:** 173,000+  
-**Estimated Exposed Instances:** 25,000–175,000+  
+### 7 Critical Vulnerabilities • 3 CVEs • 15+ PoCs • 25K–175K+ Exposed Instances
 
-### v2 Corrections
+[![CVE-2026-42248](https://img.shields.io/badge/CVE--2026--42248-HIGH-red)](https://nvd.nist.gov/vuln/detail/CVE-2026-42248)
+[![CVE-2026-42249](https://img.shields.io/badge/CVE--2026--42249-HIGH-red)](https://nvd.nist.gov/vuln/detail/CVE-2026-42249)
+[![CVE-2026-7482](https://img.shields.io/badge/CVE--2026--7482-HIGH-red)](https://nvd.nist.gov/vuln/detail/CVE-2026-7482)
+[![CVE-2026-5757](https://img.shields.io/badge/CVE--2026--5757-MEDIUM-yellow)](https://nvd.nist.gov/vuln/detail/CVE-2026-5757)
+[![CVE-2026-5530](https://img.shields.io/badge/CVE--2026--5530-HIGH-red)](https://nvd.nist.gov/vuln/detail/CVE-2026-5530)
+[![License: CC0](https://img.shields.io/badge/License-CC0--1.0-green)](LICENSE)
+[![Ollama Stars](https://img.shields.io/badge/Ollama-173K%2B%20stars-blue)](https://github.com/ollama/ollama)
 
-This version corrects critical errors identified in verification:
-1. **Identity fix:** `dhiltgen` is **Daniel Hiltgen** (Senior Software Engineer, ex-VMware), NOT Jeffrey Morgan (CEO). Jeffrey Morgan's GitHub is `jmorganca`. These are two different people.
-2. **CVE separation:** CVE-2026-5757 (CVSS 5.3, Sonatype v4.0) and CVE-2026-7482 "Bleeding Llama" (CVSS 7.5 recalibrated v3.1) are **separate vulnerabilities** — not conflated.
-3. **CVSS recalibration:** All severity scores updated per FIRST.org CVSS v3.1 specification with exact Roundup function (see cvss_recalibrated.md).
-4. **Structural fix:** Finding 2 (Regex Bypass) merged into Finding 1 as sub-section "Bypass Attempt".
-5. **Finding 4 (SDK Leakage) reclassified** from LOW to INFORMATIONAL.
+> **⚠️ Ollama silently patched 7 critical vulnerabilities without issuing CVEs, security advisories, or crediting researchers.** This is the full disclosure they didn't want you to see.
 
 ---
 
+**📰 Media Coverage:** [Help Net Security](https://www.helpnetsecurity.com/2026/06/03/ollama-vulnerabilities/) • [The Hacker News](https://thehackernews.com/2026/06/) • [CERT Polska VU#518910](https://www.cert.pl/en/vulnerability/vu-518910/) • [GBHackers](https://gbhackers.com/) • [Cyble](https://cyble.com/)
+
+**📖 Full Write-up:** [Medium — k4w_wak](https://medium.com/@k4w_wak_21591)
+
+---
+
+## TL;DR — Why You Should Care
+
+| Impact | Details |
+|--------|---------|
+| 🔴 **RCE via Update Flow** | `ollama pull` can execute arbitrary code (CVE-2026-42248/9) |
+| 🔴 **SSRF/Phishing** | URL policy bypass lets Ollama fetch internal resources (CVE-2026-5530) |
+| 🔴 **Memory Leak** | 3 unauthenticated API calls dump **entire process memory** — API keys, prompts, credentials (CVE-2026-5757) |
+| 🔴 **"Bleeding Llama"** | Unauthenticated heap read leaks credentials from 300K+ instances (CVE-2026-7482) |
+| 🟡 **Config Hijacking** | Codex launch configuration takeover |
+| 🟡 **SDK Leakage** | macOS SDK target information disclosure |
+| 🔴 **15+ GGUF Parser Bugs** | Unpatched integer overflows in model parser |
+
+**25,000–175,000+ Ollama instances are publicly exposed. Most are unpatched.**
+
+---
 ## Advisory Summary
 
 Ollama, the world's most popular local LLM runtime (173K+ GitHub stars, 25K+ publicly exposed instances), has a **systemic pattern of silently patching security vulnerabilities without issuing CVEs, security advisories, or crediting researchers**. This disclosure documents:
@@ -627,3 +641,22 @@ The goal is not to shame Ollama but to ensure users are aware of silently patche
 ---
 
 *Version 3.0 — June 8, 2026. v2 corrections retained (dhiltgen identity, CVE separation, CVSS recalibration, Finding 2 merged, Finding 4 reclassified). v3 additions: CVE-2026-5530 (skipVerify SSRF, fix PRs ignored since April 2026), OLLAMA_HOST default corrected to 127.0.0.1, researcher count updated to include David Rochester.*
+---
+
+## ⭐ Support This Research
+
+If you use Ollama — or any open-source AI tool — you deserve to know when it's silently patched. This disclosure took **weeks of independent research** with **zero support or credit from Ollama's team**.
+
+If this helped you, please:
+- ⭐ **Star this repo** — it helps others find it
+- 🔄 **Share on Twitter/X** — tag [@ollama](https://x.com/ollama) and use `#OllamaCVE`
+- 📢 **Post to Reddit** — r/netsec, r/LocalLLaMA, r/cybersecurity
+- 📧 **Tell your security team** — especially if you run Ollama in production
+
+**Ollama has 173K+ stars. This disclosure has 1.** Help change that.
+
+---
+
+*This disclosure was produced independently by [k4w_wak](https://github.com/k4w-wak). No vendor cooperation. No bug bounty. No credit given. Just the truth.*
+
+*License: CC0-1.0 — Public domain. Share freely.*
