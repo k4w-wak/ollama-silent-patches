@@ -14,7 +14,7 @@
 
 ---
 
-**📰 Media Coverage:** [Help Net Security](https://www.helpnetsecurity.com/2026/06/03/ollama-vulnerabilities/) • [The Hacker News](https://thehackernews.com/2026/06/) • [CERT Polska VU#518910](https://www.cert.pl/en/vulnerability/vu-518910/) • [GBHackers](https://gbhackers.com/) • [Cyble](https://cyble.com/)
+**📰 Media Coverage:** [Help Net Security](https://www.helpnetsecurity.com/2026/05/05/ollama-windows-vulnerabilities-cve-2026-42248-cve-2026-42249/) • [The Hacker News](https://thehackernews.com/2026/05/ollama-out-of-bounds-read-vulnerability.html) • [CERT/CC VU#518910](https://kb.cert.org/vuls/id/518910) • [CERT Polska](https://cert.pl/en/posts/2026/04/CVE-2026-42248/) • [CSO Online](https://www.csoonline.com/article/4168584/ollama-vulnerability-highlights-danger-of-ai-frameworks-with-unrestricted-access.html) • [Cybersecurity News](https://cybersecuritynews.com/ollama-vulnerability-exposes-servers/)
 
 **📖 Full Write-up:** [Medium — k4w_wak](https://medium.com/@k4w_wak_21591)
 
@@ -437,7 +437,7 @@ In Ollama's `PullModel` function, a `skipVerify` map tracks whether each blob ne
 
 ### Proof of Concept
 
-Full PoC at [github.com/davidrxchester/CVE-2026-5530](https://github.com/davidrxchester/CVE-2026-5530). Supports three modes: Enum (find internal endpoints), Exfil (exfiltrate SSRF responses), Probe (binary search + exfiltrate).
+Full PoC at [GitHub Advisory GHSA-r4wp-gg33-whwg](https://github.com/advisories/GHSA-r4wp-gg33-whwg). Supports three modes: Enum (find internal endpoints), Exfil (exfiltrate SSRF responses), Probe (binary search + exfiltrate).
 
 ### The Fixes (Both Ignored)
 
