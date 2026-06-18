@@ -24,6 +24,23 @@ TOOLS_DIR = os.path.join(PROJECT_DIR, "tools_bin")
 MOBILE_TOOLS_DIR = os.path.join(PROJECT_DIR, "mobile_tools")
 ADB_BIN = os.path.join(MOBILE_TOOLS_DIR, "adb")
 
+# Output directory: prefer ~/Skrivebord if it exists, otherwise project/reports/output
+def _output_dir() -> str:
+    desktop = os.path.expanduser("~/Skrivebord")
+    if os.path.isdir(desktop):
+        return desktop
+    fallback = os.path.join(PROJECT_DIR, "reports", "output")
+    os.makedirs(fallback, exist_ok=True)
+    return fallback
+
+# CLI tool availability check (prevents silent failures)
+def _tool_available(name: str) -> bool:
+    """Return True if a CLI executable exists on PATH."""
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        if os.path.exists(os.path.join(path, name)):
+            return True
+    return False
+
 try:
     from .config import MAX_TOOL_OUTPUT, MAX_BASH_TIMEOUT
 except ImportError:
@@ -704,7 +721,7 @@ def security_report(title: str, content: str) -> str:
     """Gem en sikkerhedsrapport paa skrivebordet. Input: 'titel\\nindhold'"""
     try:
         lines = content.split('\\n') if '\\n' in content else content.split('\n')
-        path = os.path.expanduser(f"~/Skrivebord/{title.replace(' ', '_')}.txt")
+        path = os.path.join(_output_dir(), f"{title.replace(' ', '_')}.txt")
         with open(path, 'w', encoding='utf-8') as f:
             f.write(f"══════════════════════════════════════════════════════\n")
             f.write(f"  {title}\n")
@@ -1465,6 +1482,8 @@ def repl_load_tool(target: str) -> str:
 
 def theharvester_tool(target: str) -> str:
     """OSINT email/domain harvester. Input: '-b all domain.com'"""
+    if not _tool_available("theHarvester"):
+        return "[INFO] theHarvester ikke installeret. sudo apt install theharvester  eller  pip install theHarvester"
     return _run_cli(f"theHarvester {target}", 60)
 
 
@@ -1494,6 +1513,8 @@ def sslscan_tool(target: str) -> str:
 
 def sslyze_tool(target: str) -> str:
     """SSL/TLS analysis. Input: '--regular hostname'"""
+    if not _tool_available("sslyze"):
+        return "[INFO] sslyze ikke installeret. sudo apt install sslyze  eller  pip install sslyze"
     return _run_cli(f"sslyze {target}", 30)
 
 
@@ -4716,7 +4737,7 @@ def poc_video(input_str: str) -> str:
     
     report_path = parts[0]
     output_name = parts[1]
-    desktop = str(Path.home() / "Skrivebord")
+    desktop = _output_dir()
     video_webm = os.path.join(desktop, f"{output_name}.webm")
     video_mp4 = os.path.join(desktop, f"{output_name}.mp4")
     

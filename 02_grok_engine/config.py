@@ -100,6 +100,18 @@ MEMORY_SHORT_TERM_SIZE = 50       # Husk 50 beskeder
 MEMORY_AUTO_SAVE = True           # Gem efter HVER besked
 STREAMING_ENABLED = True          # Live token streaming
 
+# ═══════════════════════════════════════════════════════════════
+# GITHUB INTEGRATION
+# ═══════════════════════════════════════════════════════════════
+GITHUB_CONFIG = {
+    "enabled": bool(os.environ.get("GITHUB_TOKEN")),
+    "token": os.environ.get("GITHUB_TOKEN", ""),
+    "owner": os.environ.get("GITHUB_OWNER", ""),
+    "repo": os.environ.get("GITHUB_REPO", ""),
+    "branch": os.environ.get("GITHUB_BRANCH", "main"),
+    "url": f"https://github.com/{os.environ.get('GITHUB_OWNER', '')}/{os.environ.get('GITHUB_REPO', '')}",
+}
+
 
 # ═══════════════════════════════════════════════════════════════
 # SLIM TOOL MODE — skjul ubrugte tools fra agenten (reversibel)
@@ -130,8 +142,7 @@ SLIM_DISABLED_TOOLS = {
     # SECURITY-cruft / dubletter
     "reverse_shell", "nuclei_scan", "sslscan", "sslyze", "sql_injection",
     "arp_scan", "honeypot_check", "wifi_scan", "wifi_scan_detailed",
-    # GIT / INTERACTIVE / META der ikke bruges
-    "git_init", "git_push", "git_status",
+    # GIT / INTERACTIVE / META
     "ask_user", "send_message",
     "cost_report", "tool_search",
     # RAG/STRUCTURED/VISION sjældne — beholdes kommenteret? Lad dem være for nu.

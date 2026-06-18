@@ -18,8 +18,8 @@ tests = [
         "Skriv GROK WAS HERE til /tmp/grok_test.txt og laes den tilbage",
     ]),
     ("NIVEAU 2", [
-        "Find alle .py filer i ~/Skrivebord/projekter/grok/core",
-        "Soeg efter 'def ' i grok kildekoden i ~/Skrivebord/projekter/grok/core",
+        "Find alle .py filer i core",
+        "Soeg efter 'def ' i grok kildekoden i core",
         "Hvad vejer filen /etc/hostname og hvad star der i den?",
     ]),
     ("NIVEAU 3", [

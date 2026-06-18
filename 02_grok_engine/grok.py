@@ -62,6 +62,24 @@ sys.path.insert(0, _GROK_DIR)
 sys.path.insert(0, os.path.join(_GROK_DIR, "core"))
 os.chdir(_GROK_DIR)
 
+# ── Load .env if present (so GITHUB_TOKEN etc. are available) ──
+_ENV_FILE = os.path.join(_GROK_DIR, ".env")
+if os.path.exists(_ENV_FILE):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(_ENV_FILE)
+    except Exception:
+        # Lightweight fallback parser if python-dotenv is missing
+        with open(_ENV_FILE, "r", encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if not _line or _line.startswith("#") or "=" not in _line:
+                    continue
+                _k, _v = _line.split("=", 1)
+                _k = _k.strip()
+                if _k not in os.environ:
+                    os.environ[_k] = _v.strip().strip(chr(34)).strip(chr(39))
+
 from core.agent import GrokAgent, Colors
 from core.models import ModelRouter
 from core.memory import MemoryManager

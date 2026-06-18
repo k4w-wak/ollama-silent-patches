@@ -89,12 +89,28 @@ def git_log(repo_path: str = "") -> str:
         return f"[FEJL] {e}"
 
 def git_push(repo_path: str = "") -> str:
-    """Push to remote. Input: path (empty = current dir)"""
+    """Push to remote. Input: path (empty = current dir).
+
+    Uses GITHUB_TOKEN env var to authenticate if plain push fails."""
     path = repo_path.strip() or os.getcwd()
+    token = os.environ.get("GITHUB_TOKEN")
     try:
+        # Try normal push first (works if credentials are cached or remote is public).
         r = subprocess.run(["git", "-C", path, "push"], capture_output=True, text=True, timeout=30)
         if r.returncode == 0:
             return f"✅ Push gennemført.\n{r.stdout[:500]}"
+        # Fallback: use token-embedded HTTPS URL if token is available.
+        if token:
+            remote_r = subprocess.run(["git", "-C", path, "remote", "get-url", "origin"],
+                                       capture_output=True, text=True, timeout=10)
+            remote_url = remote_r.stdout.strip()
+            if remote_url.startswith("https://github.com/"):
+                auth_url = f"https://{token}@github.com/{remote_url.split('github.com/', 1)[1]}"
+                r2 = subprocess.run(["git", "-C", path, "push", auth_url],
+                                    capture_output=True, text=True, timeout=30)
+                if r2.returncode == 0:
+                    return f"✅ Push gennemført (token-auth).\n{r2.stdout[:500]}"
+                return f"[FEJL] Token push fejlede: {r2.stderr[:500]}"
         return f"[FEJL] {r.stderr[:500]}"
     except Exception as e:
         return f"[FEJL] {e}"
