@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Bevis — myway.dk GDPR-brud</title>
+<style>
+body { font-family: 'Courier New', monospace; margin: 40px; background: #1a1a2e; color: #e0e0e0; }
+h1 { color: #ff6b6b; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px; }
+h2 { color: #ffd93d; }
+.box { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; margin: 20px 0; }
+.danger { background: #2d1b1b; border: 2px solid #ff6b6b; }
+.record { background: #0a0a1a; padding: 10px; margin: 5px 0; border-left: 3px solid #ff6b6b; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin: 2px; }
+.tag-fogedsag { background: #ff0000; color: white; }
+.tag-inkasso { background: #ff8800; color: white; }
+.tag-fraud { background: #ff00ff; color: white; }
+.tag-active { background: #00aa00; color: white; }
+.tag-cancelled { background: #888888; color: white; }
+.stat { font-size: 24px; color: #ff6b6b; font-weight: bold; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+th { background: #0f3460; }
+.red { color: #ff6b6b; font-weight: bold; }
+.warning { color: #ffd93d; }
+</style></head><body>
+<h1>⚠️ BEVIS — myway.dk GDPR-brud</h1>
+<p>Dokumentationsdato: [UDFYLD DATO]</p>
+<p>URL: <code>https://www.myway.dk/wp-json/my-shop/v1/subscription-orders</code></p>
+<p>Autentifikation krævet: <span class="red">NEJ</span></p>
+
+<div class="box danger">
+<h2>🔴 KRITISK: Følsomme personoplysninger eksponeret</h2>
+<p>myway.dk eksponerer følgende data UDEN login for alle 8867 kunder:</p>
+<table>
+<tr><th>Felt</th><th>Eksempel</th><th>GDPR-kategori</th></tr>
+<tr><td>post_status</td><td class="red">wc-mw-fogedsag</td><td>🔴 FØLSOM (Artikel 9)</td></tr>
+<tr><td>birthyear</td><td>XX</td><td>Identifikator</td></tr>
+<tr><td>gender</td><td>M/K</td><td>Identifikator</td></tr>
+<tr><td>postcode</td><td>XXXX</td><td>Lokalisering</td></tr>
+<tr><td>city</td><td>Bynavn</td><td>Lokalisering</td></tr>
+<tr><td>subhandle</td><td>XXXXX_XX</td><td>Identifikator</td></tr>
+</table>
+</div>
+
+<div class="box">
+<h2>📊 Statistik</h2>
+<table>
+<tr><th>Status</th><th>Antal</th><th>Risiko</th></tr>
+<tr><td>wc-cancelled</td><td>3655</td><td>🟡 MEDIUM</td></tr>
+<tr><td>wc-mw-active-sub</td><td>2702</td><td></td></tr>
+<tr><td>wc-completed</td><td>2383</td><td></td></tr>
+<tr><td>wc-mw-fogedsag</td><td>63</td><td>🔴 KRITISK</td></tr>
+<tr><td>wc-mw-opsigelse</td><td>44</td><td></td></tr>
+<tr><td>wc-mw-incasso</td><td>8</td><td>🟠 HØJ</td></tr>
+<tr><td>wc-mw-esignature</td><td>6</td><td></td></tr>
+<tr><td>wc-mw-fraud</td><td>2</td><td>🔴 KRITISK</td></tr>
+<tr><td>wc-mw-creditcheck-in</td><td>2</td><td></td></tr>
+<tr><td>wc-on-hold</td><td>1</td><td></td></tr>
+<tr><td>wc-mw-ready-to-ship</td><td>1</td><td></td></tr>
+</table>
+</div>
+
+<div class="box danger">
+<h2>🔴 Fogedsag-records (tvangfuldbyrdelse)</h2>
+<p>Antal: <span class="stat">63</span></p>
+<p>Følgende kunder står offentligt markeret som havende en sag i fogedretten:</p>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=00 | gender=M | postcode=3520 | city=Farum | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=92 | gender=M | postcode=8900 | city=Randers C | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=80 | gender=M | postcode=2450 | city=København SV | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=98 | gender=M | postcode=4200 | city=Slagelse | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=82 | gender=M | postcode=4140 | city=Borup | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=95 | gender=M | postcode=2500 | city=Valby | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=04 | gender=M | postcode=8220 | city=Brabrand | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=84 | gender=M | postcode=3300 | city=Frederiksværk | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=81 | gender=F | postcode=8210 | city=Aarhus v | source=None
+</div>
+<div class="record">
+<span class="tag tag-fogedsag">FOGEDSAG</span>
+birthyear=53 | gender=F | postcode=8600 | city=Silkeborg | source=None
+</div>
+</div>
+
+<div class="box danger">
+<h2>🟠 Inkasso-records</h2>
+<p>Antal: <span class="stat">8</span></p>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=41 | gender=M | postcode=3650 | city=Ølstykke | source=None
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=63 | gender=M | postcode=5000 | city=Odense C | source=None
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=01 | gender=F | postcode=7470 | city=Karup J | source=None
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=63 | gender=F | postcode=3630 | city=Jægerspris | source=None
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=89 | gender=M | postcode=9220 | city=Aalborg øst | source=google
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=06 | gender=M | postcode=6752 | city=Glejbjerg | source=(direct)
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=97 | gender=F | postcode=6752 | city=Glejbjerg | source=(direct)
+</div>
+<div class="record">
+<span class="tag tag-inkasso">INKASSO</span>
+birthyear=98 | gender=M | postcode=2665 | city=Vallensbæk Strand | source=(direct)
+</div>
+</div>
+
+<div class="box danger">
+<h2>🔴 Svindel-records (fraud)</h2>
+<p>Antal: <span class="stat">2</span></p>
+<div class="record">
+<span class="tag tag-fraud">SVINDEL</span>
+birthyear=43 | gender=M | postcode=2635 | city=Ishøj | source=None
+</div>
+<div class="record">
+<span class="tag tag-fraud">SVINDEL</span>
+birthyear=95 | gender=M | postcode=2650 | city=Hvidovre | source=google
+</div>
+</div>
+
+<div class="box">
+<h2>⚖️ Overtrådte GDPR-artikler</h2>
+<ul>
+<li><strong>Artikel 5(1)(f)</strong> — Integritet og fortrolighed</li>
+<li><strong>Artikel 6</strong> — Manglende retsgrundlag</li>
+<li><strong>Artikel 9(1)</strong> — Følsomme oplysninger (gæld, fogedsag)</li>
+<li><strong>Artikel 25</strong> — Data protection by design and by default</li>
+<li><strong>Artikel 32</strong> — Utilstrækkelig teknisk sikkerhed</li>
+<li><strong>Artikel 33</strong> — Manglende underretning af Datatilsynet</li>
+<li><strong>Artikel 34</strong> — Manglende underretning af berørte personer</li>
+</ul>
+<p><strong>Bødegrundlag:</strong> Op til 20 mio EUR eller 4% af global omsætning</p>
+</div>
+
+<div class="box">
+<h2>🏢 Modpart</h2>
+<p><strong>DUKA A/S</strong> (CVR 32834655)</p>
+<p>Adm. direktør: Kim Krohn Gervin</p>
+<p>Adresse: Hinnerup Stationsvej 21, 8382 Hinnerup</p>
+<p>Revisor: PwC</p>
+</div>
+
+</body></html>

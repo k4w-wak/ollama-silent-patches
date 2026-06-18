@@ -1,0 +1,122 @@
+{
+  "CVE-2026-45829": {
+    "product": "ChromaDB",
+    "severity": "CRITICAL",
+    "cvss": 10.0,
+    "description": "Pre-auth RCE via HuggingFace model loading. Unauthenticated attacker can execute arbitrary code by sending malicious embedding-function configuration.",
+    "affected_versions": "1.0.0 - 1.5.8+",
+    "exploit_path": "POST /api/v2/tenants/{tenant}/databases/{db}/collections with trust_remote_code=True and malicious HuggingFace model",
+    "port": 8000,
+    "mitigation": "Isolate ChromaDB from internet. Enable auth. Pin to specific model versions."
+  },
+  "CVE-2024-39720": {
+    "product": "Ollama",
+    "severity": "HIGH",
+    "cvss": 8.2,
+    "description": "OOM read via malformed GGUF file. Attacker crashes application through CreateModel route.",
+    "affected_versions": "< 0.1.46",
+    "exploit_path": "POST /api/create with malformed GGUF file",
+    "port": 11434,
+    "mitigation": "Upgrade to Ollama >= 0.1.46"
+  },
+  "CVE-2024-39721": {
+    "product": "Ollama",
+    "severity": "HIGH",
+    "cvss": 7.5,
+    "description": "DoS via /dev/random path read. CreateModelHandler reads arbitrary files including /dev/random.",
+    "affected_versions": "< 0.1.34",
+    "exploit_path": "POST /api/create with path=/dev/random",
+    "port": 11434,
+    "mitigation": "Upgrade to Ollama >= 0.1.34"
+  },
+  "CVE-2024-39722": {
+    "product": "Ollama",
+    "severity": "HIGH",
+    "cvss": 7.5,
+    "description": "Path traversal in api/push route. Exposes server file system structure.",
+    "affected_versions": "< 0.1.46",
+    "exploit_path": "GET /api/push with path traversal",
+    "port": 11434,
+    "mitigation": "Upgrade to Ollama >= 0.1.46"
+  },
+  "CVE-2024-28224": {
+    "product": "Ollama",
+    "severity": "MEDIUM",
+    "cvss": 6.6,
+    "description": "DNS rebinding allows unauthorized API access - chat with LLM, delete models, DoS.",
+    "affected_versions": "< 0.1.29",
+    "exploit_path": "DNS rebinding attack against Ollama API",
+    "port": 11434,
+    "mitigation": "Upgrade to Ollama >= 0.1.29. Bind to localhost only."
+  },
+  "CVE-2024-27132": {
+    "product": "MLflow",
+    "severity": "HIGH",
+    "cvss": 7.5,
+    "description": "XSS in MLflow templates leads to client-side RCE when running untrusted recipes.",
+    "affected_versions": "All versions before fix",
+    "exploit_path": "XSS in MLflow recipe template variables \u2192 RCE in Jupyter Notebook",
+    "port": 5000,
+    "mitigation": "Sanitize template variables. Upgrade MLflow."
+  },
+  "CVE-2024-27133": {
+    "product": "MLflow",
+    "severity": "CRITICAL",
+    "cvss": 9.8,
+    "description": "Cross-site scripting vulnerability in MLflow leads to RCE.",
+    "affected_versions": "All versions before fix",
+    "exploit_path": "XSS via dataset table fields \u2192 client-side RCE",
+    "port": 5000,
+    "mitigation": "Sanitize all user inputs. Upgrade MLflow."
+  },
+  "CVE-2025-24357": {
+    "product": "vLLM",
+    "severity": "MEDIUM",
+    "cvss": 5.6,
+    "description": "Arbitrary code execution via model weights download in hf_model_weights_iterator.",
+    "affected_versions": "Affected versions",
+    "exploit_path": "Malicious model weights \u2192 code execution",
+    "port": 8000,
+    "mitigation": "Pin model versions. Verify model integrity."
+  },
+  "CVE-2024-8768": {
+    "product": "vLLM",
+    "severity": "MEDIUM",
+    "cvss": 5.5,
+    "description": "Empty prompt in completions API crashes vLLM server.",
+    "affected_versions": "Affected versions",
+    "exploit_path": "POST /v1/completions with empty prompt",
+    "port": 8000,
+    "mitigation": "Upgrade vLLM. Validate input."
+  },
+  "CVE-2023-29374": {
+    "product": "LangChain",
+    "severity": "HIGH",
+    "cvss": 7.8,
+    "description": "Prompt injection in LLMMathChain allows arbitrary code execution.",
+    "affected_versions": "< 0.0.132",
+    "exploit_path": "Crafted prompt via LLMMathChain \u2192 Python code execution",
+    "port": "Various",
+    "mitigation": "Upgrade LangChain >= 0.0.132"
+  },
+  "CVE-2023-36258": {
+    "product": "LangChain",
+    "severity": "CRITICAL",
+    "cvss": 9.8,
+    "description": "Arbitrary code execution via Python code execution.",
+    "affected_versions": "< 0.0.236",
+    "exploit_path": "Crafted prompt \u2192 Python code execution",
+    "port": "Various",
+    "mitigation": "Upgrade LangChain >= 0.0.236"
+  },
+  "CVE-2024-8063": {
+    "product": "Ollama",
+    "severity": "MEDIUM",
+    "cvss": 5.5,
+    "description": "Divide by zero in GGUF model import via crafted block_count.",
+    "affected_versions": "<= v0.3.3",
+    "exploit_path": "POST /api/create with crafted GGUF model",
+    "port": 11434,
+    "mitigation": "Upgrade Ollama. Validate model files."
+  }
+}

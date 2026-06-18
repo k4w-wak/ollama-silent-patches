@@ -1,0 +1,265 @@
+[
+  {
+    "ip": "65.108.128.91",
+    "ports": [
+      443,
+      2222,
+      4000
+    ],
+    "matching_ai_ports": [
+      4000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.91.128.108.65.clients.your-server.de"
+    ],
+    "cpes": []
+  },
+  {
+    "ip": "65.108.128.142",
+    "ports": [
+      80,
+      8000
+    ],
+    "matching_ai_ports": [
+      8000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.142.128.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:f5:nginx"
+    ]
+  },
+  {
+    "ip": "65.108.128.241",
+    "ports": [
+      80,
+      9091
+    ],
+    "matching_ai_ports": [
+      9091
+    ],
+    "vulns": [
+      "CVE-2026-24072",
+      "CVE-2013-0941",
+      "CVE-2026-33007",
+      "CVE-2011-1176",
+      "CVE-2026-33006",
+      "CVE-2013-0942",
+      "CVE-2026-29169",
+      "CVE-2012-3526",
+      "CVE-2013-2765",
+      "CVE-2026-34032"
+    ],
+    "hostnames": [
+      "65-108-128-241.ptr"
+    ],
+    "cpes": [
+      "cpe:/a:php:php:8.3.30",
+      "cpe:/a:openssl:openssl:3.0.18",
+      "cpe:/a:apache:http_server:2.4.66"
+    ]
+  },
+  {
+    "ip": "65.108.128.245",
+    "ports": [
+      3000
+    ],
+    "matching_ai_ports": [
+      3000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.245.128.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:facebook:react",
+      "cpe:/a:vercel:next.js"
+    ]
+  },
+  {
+    "ip": "65.108.129.28",
+    "ports": [
+      22,
+      80,
+      443,
+      3001
+    ],
+    "matching_ai_ports": [
+      3001
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.28.129.108.65.clients.your-server.de",
+      "gymkeeper.fi"
+    ],
+    "cpes": [
+      "cpe:/a:openbsd:openssh:9.6p1",
+      "cpe:/a:golang:go",
+      "cpe:/o:canonical:ubuntu_linux",
+      "cpe:/a:caddyserver:caddy"
+    ]
+  },
+  {
+    "ip": "65.108.129.30",
+    "ports": [
+      80,
+      443,
+      3000,
+      8181,
+      8188
+    ],
+    "matching_ai_ports": [
+      3000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.30.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:apache:http_server",
+      "cpe:/a:nodejs:nodejs",
+      "cpe:/a:n8n:n8n"
+    ]
+  },
+  {
+    "ip": "65.108.129.97",
+    "ports": [
+      8000
+    ],
+    "matching_ai_ports": [
+      8000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.97.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:f5:nginx"
+    ]
+  },
+  {
+    "ip": "65.108.129.119",
+    "ports": [
+      22,
+      2222,
+      5432,
+      8888
+    ],
+    "matching_ai_ports": [
+      8888
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.119.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/o:canonical:ubuntu_linux",
+      "cpe:/a:f5:nginx",
+      "cpe:/a:postgresql:postgresql:16",
+      "cpe:/a:openbsd:openssh:9.6p1",
+      "cpe:/a:gitlab:gitlab"
+    ]
+  },
+  {
+    "ip": "65.108.129.169",
+    "ports": [
+      22,
+      6001,
+      8000
+    ],
+    "matching_ai_ports": [
+      8000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.169.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:f5:nginx",
+      "cpe:/o:linux:linux_kernel",
+      "cpe:/o:debian:debian_linux",
+      "cpe:/a:openbsd:openssh:8.4p1"
+    ]
+  },
+  {
+    "ip": "65.108.129.175",
+    "ports": [
+      80,
+      443,
+      3000,
+      8081
+    ],
+    "matching_ai_ports": [
+      3000
+    ],
+    "vulns": [
+      "CVE-2025-4123",
+      "CVE-2026-27876",
+      "CVE-2025-23419",
+      "CVE-2026-21720",
+      "CVE-2026-21727",
+      "CVE-2026-21722",
+      "CVE-2026-21721",
+      "CVE-2024-1442",
+      "CVE-2026-27880",
+      "CVE-2025-12141"
+    ],
+    "hostnames": [
+      "static.175.129.108.65.clients.your-server.de",
+      "db.grabscape.market"
+    ],
+    "cpes": [
+      "cpe:/a:grafana:grafana:10.2.2",
+      "cpe:/a:f5:nginx:1.25.3",
+      "cpe:/a:facebook:react",
+      "cpe:/a:f5:nginx"
+    ]
+  },
+  {
+    "ip": "65.108.129.186",
+    "ports": [
+      22,
+      3000
+    ],
+    "matching_ai_ports": [
+      3000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.186.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/a:openbsd:openssh:9.6p1",
+      "cpe:/a:vercel:next.js",
+      "cpe:/o:canonical:ubuntu_linux",
+      "cpe:/a:facebook:react"
+    ]
+  },
+  {
+    "ip": "65.108.129.190",
+    "ports": [
+      22,
+      80,
+      443,
+      6001,
+      6002,
+      8000,
+      9090
+    ],
+    "matching_ai_ports": [
+      8000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "static.190.129.108.65.clients.your-server.de"
+    ],
+    "cpes": [
+      "cpe:/o:canonical:ubuntu_linux",
+      "cpe:/a:f5:nginx",
+      "cpe:/a:openbsd:openssh:8.9p1"
+    ]
+  }
+]

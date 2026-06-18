@@ -1,0 +1,32 @@
+[
+  {
+    "ip": "51.75.5.1",
+    "ports": [
+      25,
+      53,
+      80,
+      111,
+      161,
+      443,
+      2201,
+      8000
+    ],
+    "matching": [
+      8000
+    ],
+    "vulns": [],
+    "hostnames": [
+      "alx.host",
+      "lb01.lomagne.alx.host"
+    ],
+    "cpes": [
+      "cpe:/o:linux:linux_kernel",
+      "cpe:/o:debian:debian_linux",
+      "cpe:/a:apache:http_server",
+      "cpe:/a:openbsd:openssh:7.4p1",
+      "cpe:/a:postfix:postfix"
+    ],
+    "org": "",
+    "data": []
+  }
+]

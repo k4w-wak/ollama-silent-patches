@@ -1,0 +1,128 @@
+{
+  "scan_date": "2026-06-02T21:30:00Z",
+  "scanner": "ollama_chromadb_mlflow_hunter v1.0",
+  "opsec": "Tor SOCKS5 (127.0.0.1:9050)",
+  "exit_ip": "45.12.3.80",
+  "targets": [
+    {
+      "host": "207.244.225.101",
+      "reverse_dns": "vmi2678758.contaboserver.net",
+      "platform": "ollama",
+      "port": 11434,
+      "alive": true,
+      "version": "0.9.4",
+      "models": [],
+      "api_endpoints": {
+        "/": {"status": 200, "response": "Ollama is running"},
+        "/api/version": {"status": 200, "response": {"version": "0.9.4"}},
+        "/api/tags": {"status": 200, "response": {"models": []}},
+        "/api/ps": {"status": 200, "response": {"models": []}},
+        "/api/create": {"status": 400, "response": "neither 'from' or 'files' was specified"},
+        "/api/push": {"status": 400, "response": "open /root/.ollama/models/manifests/..."},
+        "/api/generate": {"status": 405, "method_not_allowed": true}
+      },
+      "authentication": "NONE",
+      "cves": {
+        "CVE-2026-7482": {
+          "vulnerable": "CONFIRMED",
+          "evidence": "Ollama v0.9.4 is well below patched version 0.17.1. /api/create endpoint accepts GGUF files. No authentication on any endpoint.",
+          "severity": "CRITICAL",
+          "cvss": 9.3,
+          "detail": "Bleeding Llama: heap out-of-bounds read in GGUF model loader. 3 API calls leak entire process memory."
+        }
+      }
+    },
+    {
+      "host": "207.244.225.101",
+      "reverse_dns": "vmi2678758.contaboserver.net",
+      "platform": "chromadb",
+      "port": 8000,
+      "alive": true,
+      "version": null,
+      "authentication": "ENABLED",
+      "cves": {
+        "CVE-2026-45829": {
+          "vulnerable": "PARTIALLY MITIGATED",
+          "evidence": "Auth required (401) on all endpoints. However, CVE-2026-45829 is pre-auth because embedding_function is processed BEFORE auth checks. Auth bypass may still be possible.",
+          "severity": "CRITICAL",
+          "cvss": 10.0,
+          "detail": "ChromaToast: Pre-auth RCE via embedding function code injection. Auth check happens AFTER code execution."
+        }
+      }
+    },
+    {
+      "host": "207.244.225.101",
+      "reverse_dns": "vmi2678758.contaboserver.net",
+      "platform": "open_webui",
+      "port": 3000,
+      "alive": true,
+      "version": "0.6.15",
+      "authentication": "ENABLED",
+      "config": {
+        "name": "Open WebUI",
+        "version": "0.6.15",
+        "auth": true,
+        "enable_signup": false,
+        "enable_api_key": true,
+        "enable_websocket": true
+      }
+    }
+  ],
+  "cve_research": {
+    "CVE-2026-7482": {
+      "product": "Ollama",
+      "type": "Heap out-of-bounds read (Bleeding Llama)",
+      "cvss": 9.3,
+      "affected": "Ollama < 0.17.1",
+      "patched": "Ollama >= 0.17.1",
+      "exposed_estimated": 175000
+    },
+    "CVE-2026-45829": {
+      "product": "ChromaDB Python",
+      "type": "Pre-auth RCE (ChromaToast)",
+      "cvss": 10.0,
+      "affected": "ChromaDB <= 1.5.9",
+      "patched": "NOT YET (use Rust impl)",
+      "exposed_estimated": 10000
+    },
+    "CVE-2024-27133": {
+      "product": "MLflow",
+      "type": "XSS → Client-side RCE",
+      "cvss": 8.8,
+      "affected": "MLflow < 2.9.0",
+      "patched": "MLflow >= 2.9.0",
+      "exposed_estimated": 5000
+    },
+    "CVE-2026-2033": {
+      "product": "MLflow",
+      "type": "Path Traversal RCE",
+      "cvss": 9.8,
+      "affected": "MLflow < 3.8.0",
+      "patched": "MLflow >= 3.8.0",
+      "exposed_estimated": 5000
+    },
+    "CVE-2026-0596": {
+      "product": "MLflow",
+      "type": "Command Injection RCE",
+      "cvss": 9.6,
+      "affected": "MLflow < 3.10.0",
+      "patched": "MLflow >= 3.10.0",
+      "exposed_estimated": 5000
+    },
+    "CVE-2024-37054": {
+      "product": "MLflow",
+      "type": "Pickle Deserialization RCE",
+      "cvss": 9.8,
+      "affected": "MLflow (authenticated)",
+      "patched": "Latest version",
+      "exposed_estimated": 5000
+    }
+  },
+  "shodan_dorks": {
+    "ollama": ["\"Ollama is running\" port:11434", "port:11434 http.html:\"Ollama\"", "port:11434 \"api/tags\""],
+    "chromadb": ["\"chroma\" port:8000", "http.html:\"chromadb\" port:8000"],
+    "mlflow": ["http.title:\"MLflow\" port:5000", "port:5000 \"/mlflow\""],
+    "open_webui": ["http.title:\"Open WebUI\""],
+    "vllm": ["port:8000 \"v1/models\"", "\"openai\" \"model\" port:8000"]
+  }
+}

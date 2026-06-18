@@ -1,0 +1,62 @@
+Here's the comprehensive research summary:
+
+---
+
+# 🎯 AI Security Goldplates — Unhunted Attack Surfaces
+
+## Key Findings
+
+### 1. MCP Servers — THE #1 Goldplate (5 CVEs, all critical)
+
+| CVE | Name | CVSS | What | Auth? | RCE? |
+|-----|------|------|------|-------|------|
+| CVE-2025-49596 | MCP Inspector RCE | 9.4 | Malicious MCP server → arbitrary code execution during inspection | None | ✅ |
+| CVE-2026-33032 | **MCPwn** (nginx-ui) | 9.8 | Missing auth middleware on MCP endpoint → full nginx takeover in 2 HTTP requests | None | ✅ |
+| CVE-2025-53967 | Framelink Figma MCP | Critical | Command injection in Figma file URL parameters | None | ✅ |
+| CVE-2026-23744 | MCPJam Inspector | Critical | Binds 0.0.0.0, no auth → single HTTP POST = install malicious MCP server = RCE | None | ✅ |
+| CVE-2026-25536 | TypeScript SDK Data Leak | Med-High | Cross-client response data leak when McpServer is shared | None | Data leak |
+| CVE-2025-68145/43/44 | Anthropic Git MCP Chain | Critical | Path bypass → SSH key theft → git hooks → RCE. Triggered via prompt injection in AI IDEs | Prompt injection | ✅ |
+
+**~2,600+ exposed MCP servers** (Knostic research). **MCPwn actively exploited in the wild.**
+
+### 2. LiteLLM — The Master Key to Everything
+- **CVE-2026-42208** (CVSS 9.3): Pre-auth SQL injection in API key verification path. Exploited within **36 hours** of disclosure. Can extract ALL stored API keys (OpenAI, Anthropic, Google, etc.), create admin keys.
+- **TeamPCP Supply Chain**: v1.82.7/1.82.8 backdoored on PyPI — 3-stage credential stealer. 95M monthly downloads affected.
+- Default port 4000, often deployed with no auth.
+
+### 3. vLLM Inference Endpoints — GPU Cluster Goldmine
+- **CVE-2025-32444**: Pickle deserialization RCE via Mooncake ZeroMQ sockets (v0.6.5–<0.8.5)
+- **CVE-2025-48956**: Single large-header GET → memory exhaustion → DoS
+- Default unauthenticated API on port 8000. `/v1/models` leaks loaded model names and configs.
+
+### 4. HuggingFace TGI — Model Supply Chain Attacks
+- **CVE-2026-0599**: Uncontrolled resource consumption via `fetch_image` → DoS
+- **1,500+ exposed API tokens** found on GitHub (Lasso Security)
+- Malicious model campaigns: attackers create fake trending models with embedded backdoors
+- `torch.load()` pickle deserialization = RCE when loading untrusted models
+
+### 5. Ray Dashboard — The Zombie That Won't Die
+- **CVE-2023-6019** (CVSS 10.0): 2+ years old, STILL actively exploited. Command injection via `cpu_profile` param.
+- **CVE-2026-27482** (CVSS 6.5): DELETE endpoints unauthenticated → kill Serve deployments, delete jobs
+- **ShadowRay 2.0**: Active global campaign — 80,469 attack sessions from 2 IPs over 11 days, self-replicating cryptomining botnet
+- **~30,000+** exposed Ray dashboards on the internet
+
+### Bonus: Ollama — 175,000+ Exposed
+- 20% allow model pushing (write access = RCE vector)
+- 91,000+ attack sessions in 3 months (GreyNoise)
+- No auth, no rate limiting, model extraction via API
+
+---
+
+## 🏆 Goldplate Ranking (Impact × Exposure × Ease)
+
+1. **🥇 MCPwn (CVE-2026-33032)** — CVSS 9.8, no auth, 2 HTTP requests, actively exploited, nginx takeover
+2. **🥇 LiteLLM SQLi (CVE-2026-42208)** — CVSS 9.3, pre-auth, steals ALL API keys, exploited in 36 hrs
+3. **🥇 Ray Dashboard (CVE-2023-6019)** — CVSS 10.0, 30K+ exposed, 2 years unpatched, active botnet
+4. **🥈 Anthropic Git MCP Chain** — Prompt injection → SSH key theft → RCE, affects all AI IDE users
+5. **🥈 MCPJam Inspector (CVE-2026-23744)** — 0.0.0.0 binding, no auth, single POST = RCE
+6. **🥈 vLLM Mooncake (CVE-2025-32444)** — Pickle RCE on GPU inference servers
+7. **🥉 Ollama** — 175K+ exposed, 20% writable, model extraction
+8. **🥉 HuggingFace TGI** — Supply chain + exposed tokens + model backdoors
+
+Full report saved to: `/home/admin_user/Skrivebord/AI_Security_Goldplates_-_Unhunted_Attack_Surface_Research.txt`

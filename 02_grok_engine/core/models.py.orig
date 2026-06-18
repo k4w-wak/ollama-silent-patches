@@ -1,0 +1,340 @@
+#!/usr/bin/env python3
+"""
+Grok Multi-Model Router
+Ollama primær — gratis, ubegrænset, FC understøttet
+"""
+
+import requests
+import json
+import time
+from typing import Optional, Dict, Any, Generator, List
+from dataclasses import dataclass
+
+try:
+    from .config import (
+        OLLAMA_BASE_URL, OLLAMA_MODELS,
+        MODEL_FALLBACK_CHAIN,
+    )
+except ImportError:
+    from config import (
+        OLLAMA_BASE_URL, OLLAMA_MODELS,
+        MODEL_FALLBACK_CHAIN,
+    )
+
+
+@dataclass
+class ModelStatus:
+    """Status for en model/provider"""
+    provider: str
+    model: str
+    available: bool = False
+    response_time_ms: float = 0.0
+    error: Optional[str] = None
+
+
+class ModelRouter:
+    """
+    Router der automatisk vælger den bedste tilgængelige model.
+    
+    Prioritet:
+    1. Ollama (prim\u00e6r, FC understttet)
+    2. Fallback k\u00e6de fra config
+    
+    Ingen GROQ, ingen rate limits, ingen API keys.
+    """
+    
+    def __init__(self):
+        self.active_provider = None
+        self.active_model = None
+        self.status_cache: Dict[str, ModelStatus] = {}
+        self._last_check = 0
+        
+    def check_ollama(self) -> ModelStatus:
+        """Tjek om Ollama k\u00f8rer"""
+        status = ModelStatus(provider="ollama", model="glm-5.1:cloud")
+        
+        try:
+            start = time.time()
+            response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=3)
+            elapsed = (time.time() - start) * 1000
+            
+            if response.status_code == 200:
+                status.available = True
+                status.response_time_ms = elapsed
+            else:
+                status.available = False
+                status.error = f"HTTP {response.status_code}"
+        except Exception as e:
+            status.available = False
+            status.error = str(e)
+        
+        self.status_cache["ollama"] = status
+        return status
+    
+    def auto_select(self) -> tuple:
+        """
+        Vælg automatisk den bedste tilgængelige model.
+        Returns: (provider, model)
+        
+        Cloud-modeller tjekkes via /api/show (ikke /api/tags som kun viser lokale modeller).
+        """
+        # Check providers i prioriteret rækkefølge
+        for entry in MODEL_FALLBACK_CHAIN:
+            provider = entry["provider"]
+            model = entry["model"]
+            
+            if provider == "ollama":
+                status = self.check_ollama()
+                if status.available:
+                    try:
+                        # Cloud-modeller: tjek via /api/show
+                        resp = requests.post(
+                            f"{OLLAMA_BASE_URL}/api/show",
+                            json={"name": model},
+                            timeout=5
+                        )
+                        if resp.status_code == 200:
+                            self.active_provider = "ollama"
+                            self.active_model = model
+                            return ("ollama", model)
+                    except:
+                        pass
+        
+        # Ingen tilgængelige — brug Ollama 3b som sidste udvej
+        self.active_provider = "ollama"
+        self.active_model = "llama3.2:3b"
+        return ("ollama", "llama3.2:3b")
+    
+    @staticmethod
+    def _clean_messages_for_ollama(messages: list) -> list:
+        """Fjern tool_calls og tool roles som Ollama ikke forstaar (kun for text-parsing mode)."""
+        clean = []
+        for msg in messages:
+            # Fjern tool role — Ollama forstaar ikke 'tool'
+            if msg.get("role") == "tool":
+                clean.append({"role": "assistant", "content": f"Tool result: {msg.get('content', '')}"})
+                continue
+            # Fjern tool_calls fra assistant messages
+            m = dict(msg)
+            if "tool_calls" in m:
+                # Konverter tool_calls til tekst
+                calls = m.pop("tool_calls")
+                texts = []
+                for tc in calls:
+                    func = tc.get("function", {})
+                    texts.append(f"Called {func.get('name', '?')}({func.get('arguments', '')})")
+                m["content"] = m.get("content", "") + "\n" + "\n".join(texts)
+            clean.append(m)
+        return clean
+
+    def chat_ollama(
+        self,
+        messages: list,
+        model: str = None,
+        temperature: float = 0.7,
+        stream: bool = False,
+        format: dict = None,
+        keep_alive: str = "5m",
+    ) -> Any:
+        """
+        Send chat request til Ollama.
+        format: JSON schema dict for structured output (optional)
+        keep_alive: how long to keep model in memory (default 5m)
+        """
+        model = model or self.active_model or "llama3.1:8b"
+        messages = self._clean_messages_for_ollama(messages)
+        
+        payload = {
+            "model": model,
+            "messages": messages,
+            "stream": stream,
+            "keep_alive": keep_alive,
+            "options": {
+                "temperature": temperature,
+                "num_ctx": 8192,
+                "num_gpu": 1,
+            }
+        }
+        
+        # Structured Output: JSON schema enforcement
+        if format:
+            payload["format"] = format
+        
+        url = f"{OLLAMA_BASE_URL}/api/chat"
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if stream:
+                    response = requests.post(url, json=payload, stream=True, timeout=300)
+                    response.raise_for_status()
+                    return response
+                else:
+                    response = requests.post(url, json=payload, timeout=300)
+                    response.raise_for_status()
+                    data = response.json()
+                    return data["message"]["content"]
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 500:
+                    if attempt < max_retries - 1:
+                        wait = (attempt + 1) * 3  # 3s, 6s, 9s
+                        print(f"\n[OLLAMA 500 — proever igen om {wait}s... (forsoeg {attempt+1}/{max_retries})]")
+                        time.sleep(wait)
+                        continue
+                raise
+            except requests.exceptions.ConnectionError:
+                if attempt < max_retries - 1:
+                    wait = (attempt + 1) * 3
+                    print(f"\n[OLLAMA connection fejl — proever igen om {wait}s...]")
+                    time.sleep(wait)
+                    continue
+                raise
+            except requests.exceptions.Timeout:
+                if attempt < max_retries - 1:
+                    wait = (attempt + 1) * 5
+                    print(f"\n[OLLAMA timeout — proever igen om {wait}s...]")
+                    time.sleep(wait)
+                    continue
+                raise
+            break
+        return "[FEJL] Ollama ikke tilgaengelig efter 3 forsoeg"
+    
+    def chat(
+        self,
+        messages: list,
+        model: str = None,
+        provider: str = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> Any:
+        """
+        Unified chat — vælg automatisk provider, eller brug den angivne.
+        Falder tilbage automatisk ved fejl.
+        """
+        from core.cost import cost_track
+        provider = provider or self.active_provider or "groq"
+        model = model or self.active_model
+        
+        try:
+            if provider == "groq":
+                try:
+                    result = self.chat_groq(messages, model, temperature, max_tokens, stream)
+                    # Ollama: no cost tracking needed
+                    return result
+                except Exception as e:
+                    # Rate limited? Vent og prøv igen
+                    if "429" in str(e) or "rate" in str(e).lower():
+                        print(f"\n[GROQ rate limited — venter 3s og proever igen...]")
+                        time.sleep(3)
+                        try:
+                            result = self.chat_groq(messages, model, temperature, max_tokens, stream)
+                            # Ollama: no cost
+                            return result
+                        except Exception:
+                            pass
+                    # Model fejlede — prøv næste i fallback chain
+                    print(f"\n[GROQ fejlede: {str(e)[:80]}] → falder tilbage til Ollama...")
+                    provider = "ollama"
+                    model = "llama3.1:8b"
+
+            if provider == "ollama":
+                result = self.chat_ollama(messages, model, temperature, stream)
+                from core.cost import cost_track
+                # Ollama har ikke usage data — estimator baseret på ord
+                input_est = sum(len(str(m.get('content','')).split()) for m in messages if m.get('content'))
+                output_est = len(str(result).split())
+                # Konverter ord til tokens (ca 1.3 tokens per ord)
+                cost_track(model=f"ollama/{model}", input_tokens=int(input_est*1.3), output_tokens=int(output_est*1.3))
+                return result
+
+        except Exception as e:
+            return f"[FEJL] Ingen model tilgængelig: {str(e)}"
+    
+    def stream_tokens(
+        self,
+        messages: list,
+        model: str = None,
+        provider: str = None,
+        temperature: float = 0.7,
+    ) -> Generator[str, None, None]:
+        """
+        Stream tokens live — giver ét token ad gangen.
+        Automatisk fallback ved fejl.
+        """
+        provider = provider or self.active_provider or "groq"
+        model = model or self.active_model
+        
+        try:
+            if provider == "groq":
+                try:
+                    response = self.chat_groq(messages, model, temperature, stream=True)
+                    for line in response.iter_lines():
+                        if line:
+                            line = line.decode('utf-8') if isinstance(line, bytes) else line
+                            if line.startswith('data: '):
+                                data_str = line[6:]
+                                if data_str.strip() == '[DONE]':
+                                    return
+                                try:
+                                    data = json.loads(data_str)
+                                    delta = data.get("choices", [{}])[0].get("delta", {})
+                                    if "content" in delta:
+                                        yield delta["content"]
+                                except json.JSONDecodeError:
+                                    continue
+                    return
+                except Exception as e:
+                    print(f"\n[GROQ stream fejlede: {str(e)[:50]}] → Ollama...")
+                    provider = "ollama"
+                    model = "llama3.1:8b"
+            
+            if provider == "ollama":
+                response = self.chat_ollama(messages, model, temperature, stream=True)
+                for line in response.iter_lines():
+                    if line:
+                        try:
+                            data = json.loads(line)
+                            if "message" in data and "content" in data["message"]:
+                                token = data["message"]["content"]
+                                if token:
+                                    yield token
+                        except json.JSONDecodeError:
+                            continue
+        
+        except Exception as e:
+            yield f"\n[FEJL] Stream fejlede: {str(e)}"
+    
+    def get_status_report(self) -> str:
+        """Returner status for alle providers"""
+        lines = []
+        
+        # GROQ removed
+        
+        ollama = self.check_ollama()
+        o_status = "✅" if ollama.available else "❌"
+        o_time = f"{ollama.response_time_ms:.0f}ms" if ollama.available else ollama.error
+        lines.append(f"  Ollama: {o_status} {ollama.model} ({o_time})")
+        
+        active = f"{self.active_provider}/{self.active_model}" if self.active_provider else "ikke valgt"
+        lines.append(f"  Aktiv: {active}")
+        
+        return "\n".join(lines)
+# === Gemini Provider ===
+import os
+from google import genai
+
+class GeminiProvider:
+    def __init__(self, api_key=None, model_name="gemini-2.0-flash"):
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError("GEMINI_API_KEY mangler")
+        self.client = genai.Client(api_key=self.api_key)
+        self.model_name = model_name
+
+    def generate(self, prompt, **kwargs):
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt
+        )
+        return response.text

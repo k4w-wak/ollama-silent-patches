@@ -1,0 +1,94 @@
+════════════════════════════════════════════════════════
+  🏴‍☠️ GROK — STATUS & MISSIONS
+════════════════════════════════════════════════════════
+
+  FLUEBEN STATUS:  2/4 ✅✅  |  3/4 LØSES I DAG  |  4/4 SAT BAGEFTER
+
+════════════════════════════════════════════════════════
+  📋 DAGENS BEGIVENHEDER (2026-05-31)
+════════════════════════════════════════════════════════
+
+  ✅ admin_user fortalte SANDHEDEN:
+     - Kan stadig ikke kode. Har aldrig skrevet 1.py.
+     - Alt er copy-paste fra AI. ALTID har været.
+     - Først for 2-3 uger siden: FØRSTE direkte besked til Grok.
+     - Før det: GLM-5.1 var ALTID imellem som tolk.
+     - Selv for 2 uger siden: TXT filer, ikke chat.
+     - 23 GB research bygget uden at kunne kode.
+
+  ✅ ALT-FRA-WSL arkivet kigget igennem:
+     - 21.944 filer, 22,67 GB
+     - 6 CRITICAL CORS submissions klar
+     - 5 Huntr Bounties klar
+     - 8 CVE ansøgninger (4 med CVSS 10.0)
+     - OpenWebUI deadline 7. juni
+     - MLflow/Bruce MacDonald follow-up klar
+
+  ✅ Flueben 3/4 løses i dag inden 6 timer
+  ✅ Flueben 4/4 sat bagefter
+
+════════════════════════════════════════════════════════
+  🎯 KLARE TIL AFSENDELSE
+════════════════════════════════════════════════════════
+
+  CORS CRITICAL (6):
+    DeepInfra — account takeover
+    DeepSeek — account takeover
+    Hyperbolic — account takeover
+    Baichuan — account DELETION
+    MiniMaxi — credentials leak
+    LangSmith — 402 endpoints, API keys, secrets
+
+  HUNTR BOUNTIES (5):
+    Dify SSRF ($1.500+)
+    ComfyUI Path Traversal ($1.500)
+    LibreChat yaml.load + CORS ($900)
+    MLflow Auth Bypass ($900-$1.800)
+    GGUF Heap Overflow ($4.000)
+
+  CVE APPLICATIONS (8):
+    CVE-2026-21858  n8n Ni8mare        CVSS 10.0
+    CVE-2026-45829  ChromaDB ChromaToast CVSS 10.0
+    CVE-2025-59528  Flowise MCP RCE      CVSS 10.0
+    CVE-2025-55182  React2Shell           CVSS 10.0
+    CVE-2026-7482   Ollama Bleeding Llama CVSS 9.1
+    CVE-2026-33017  Langflow RCE          CVSS 9.8
+    CVE-2025-11201  MLflow Dir Traversal  CVSS 9.8
+    CVE-2026-22778  vLLM Video RCE        CVSS 9.8
+
+  OPENWEBUI:
+    Deadline: 7. juni 2026
+    Backoffice exposed, emails exposed, version leak
+
+  MLFLOW/BRUCE MACDONALD:
+    8 compromised hosts documented
+    Hetzner cluster, DigitalOcean, Contabo
+    371 experiments, dnsg.cc campaign
+
+════════════════════════════════════════════════════════
+  🔴 K4W_WAK MANIFESTO
+════════════════════════════════════════════════════════
+
+  ⛔ ALDRIG BUG BOUNTY PLATFORME ⛔
+  ✅ DIREKTE DISCLOSURE — CVE + CISO + security@ email
+  ✅ 90 DAGE GRACE PERIOD — derefter public advisory
+  ⛔ ALDRIG SÆLGE TIL HACKERE ⛔
+  ✅ VI ER HER FORDI VI ELSKER AT FINDE DET ANDRE IKKE FINDE
+
+════════════════════════════════════════════════════════
+  🔧 280+ TOOLS TILGÆNGELIGE
+════════════════════════════════════════════════════════
+
+  Start mission:
+    cd ~/Skrivebord/projekter/grok
+    python3 grok.py --model glm-5.1:cloud --batch "MISSION"
+
+  Start interaktiv:
+    cd ~/Skrivebord/projekter/grok
+    python3 grok.py
+
+════════════════════════════════════════════════════════
+  🔴 REMINDER: ALWAYS SEARCH THE WEB FIRST 🔴
+  ⛔ YOUR TRAINING DATA IS 1-3 YEARS OLD. IT IS STALE. ⛔
+  ⛔ ALWAYS web_search() BEFORE answering factual questions ⛔
+════════════════════════════════════════════════════════

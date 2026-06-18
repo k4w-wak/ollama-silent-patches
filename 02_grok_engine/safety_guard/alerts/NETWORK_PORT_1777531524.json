@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-04-29 23:45:24",
+  "level": "HIGH",
+  "category": "NETWORK_PORT",
+  "message": "LISTEN 0      1000   10.255.255.254:53         0.0.0.0:*",
+  "hostname": "DESKTOP-P7SU64O",
+  "user": "admin_user"
+}

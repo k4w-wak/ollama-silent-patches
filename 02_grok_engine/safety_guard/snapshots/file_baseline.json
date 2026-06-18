@@ -1,0 +1,67 @@
+{
+  "/etc/passwd": {
+    "hash": "b1f34d4e47463dd554b84ab6cc461de6a3424616e54a92b14c9d794cf50aeb00",
+    "mtime": "1777503561.555557",
+    "size": 3169
+  },
+  "/etc/shadow": {
+    "hash": "ERROR",
+    "mtime": "1777503561.4355571",
+    "size": 1428
+  },
+  "/etc/hosts": {
+    "hash": "e4c221a987e1548fd11c42f922041a8da125614ea8de901bf10727b3f171743d",
+    "mtime": "1777521641.7615392",
+    "size": 427
+  },
+  "/etc/resolv.conf": {
+    "hash": "480ec998945eff4601da3bff0e220cfc009ff83eeecf128cd880fe50c7a2c9d3",
+    "mtime": "1777521301.92555",
+    "size": 200
+  },
+  "/etc/ssh/sshd_config": {
+    "hash": "f1805313ad346bdb80dff4a560a080edfca9a998f620b64da2a1aba6bcf6782e",
+    "mtime": "1771497975.0",
+    "size": 3424
+  },
+  "/etc/crontab": {
+    "hash": "e25eb0e3303ea63ac7452139be788efa86d89a11005288e7150c0ac193d7e1f6",
+    "mtime": "1767792670.0",
+    "size": 1042
+  },
+  "/etc/sudoers": {
+    "hash": "ERROR",
+    "mtime": "1770755373.0",
+    "size": 1881
+  },
+  "/etc/firefox/syspref.js": {
+    "hash": "MISSING",
+    "mtime": "MISSING",
+    "size": 0
+  },
+  "/etc/proxychains.conf": {
+    "hash": "MISSING",
+    "mtime": "MISSING",
+    "size": 0
+  },
+  "/home/admin_user/.ssh/authorized_keys": {
+    "hash": "MISSING",
+    "mtime": "MISSING",
+    "size": 0
+  },
+  "/home/admin_user/.bashrc": {
+    "hash": "858e39a5eb9a9e586fbdcf31beaf77d7a031f86fa20f40e4e10c6d50ad6207df",
+    "mtime": "1777506423.3435545",
+    "size": 5782
+  },
+  "/home/admin_user/.bash_history": {
+    "hash": "43235c25f98f07cca3d993f4678447af28faeda38afcd2bd4b93f4f8c9190860",
+    "mtime": "1777529856.6695411",
+    "size": 16780
+  },
+  "/home/admin_user/.ssh/config": {
+    "hash": "MISSING",
+    "mtime": "MISSING",
+    "size": 0
+  }
+}

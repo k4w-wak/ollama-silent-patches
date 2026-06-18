@@ -1,0 +1,121 @@
+[
+  {
+    "ip": "135.181.203.79",
+    "hostnames": [
+      "static.79.203.181.135.clients.your-server.de"
+    ],
+    "ports": [
+      80,
+      6001,
+      8000
+    ],
+    "ai_ports": [
+      8000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": []
+  },
+  {
+    "ip": "178.62.120.46",
+    "hostnames": [],
+    "ports": [
+      23,
+      80,
+      88,
+      102,
+      110,
+      442,
+      1833,
+      2232,
+      4000,
+      4433,
+      4840,
+      6440,
+      6633,
+      8442,
+      9042,
+      9930,
+      9999
+    ],
+    "ai_ports": [
+      4000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": [
+      "cloud"
+    ]
+  },
+  {
+    "ip": "95.216.245.158",
+    "hostnames": [
+      "static.158.245.216.95.clients.your-server.de"
+    ],
+    "ports": [
+      5000
+    ],
+    "ai_ports": [
+      5000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": []
+  },
+  {
+    "ip": "135.181.208.122",
+    "hostnames": [
+      "static.122.208.181.135.clients.your-server.de"
+    ],
+    "ports": [
+      3389,
+      5353,
+      8000
+    ],
+    "ai_ports": [
+      8000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": [
+      "self-signed"
+    ]
+  },
+  {
+    "ip": "95.216.142.181",
+    "hostnames": [
+      "static.181.142.216.95.clients.your-server.de"
+    ],
+    "ports": [
+      8000,
+      8080
+    ],
+    "ai_ports": [
+      8000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": []
+  },
+  {
+    "ip": "178.62.230.120",
+    "hostnames": [
+      "nina.fm"
+    ],
+    "ports": [
+      80,
+      443,
+      8000,
+      8001
+    ],
+    "ai_ports": [
+      8000
+    ],
+    "ai_cpes": [],
+    "vulns": [],
+    "tags": [
+      "cloud",
+      "cdn"
+    ]
+  }
+]

@@ -1,0 +1,72 @@
+## 🔴 CRITICAL CVEs — MAY 2026 ACTIVE EXPLOITATION INTELLIGENCE REPORT
+
+Report saved to desktop. Here's the complete breakdown:
+
+---
+
+### 1. 📁 SharePoint — CVE-2025-53770 (ToolShell)
+- **CVSS 9.8** | **⛔ ACTIVELY EXPLOITED** | CISA KEV listed
+- Deserialization → Pre-Auth RCE; chains with earlier SharePoint CVEs
+- ~235,000 internet-facing SharePoint servers
+- Federal agencies breached July 2025; exploitation continues into 2026
+- **Public PoC:** MuhammadWaseem29/CVE-2025-53770
+
+### 2. ⚛️ React Server Components — CVE-2025-55182/66478 (React2Shell)
+- **CVSS 10.0** | **⛔ ACTIVELY EXPLOITED** | CISA KEV listed
+- Unsafe deserialization in Flight protocol → Pre-Auth RCE
+- Affects React 19.0.0–19.2.0; 700+ Next.js servers compromised in 24 hours
+- Apps without Server Functions endpoints may STILL be vulnerable
+- **Public PoCs:** lachlan2k/React2Shell, kOaDT/poc-cve-2025-55182 (beware fake PoCs with malware)
+
+### 3. 🐙 GitHub Enterprise Server — CVE-2026-3854
+- **CVSS 8.7** | Patched before active exploitation (Wiz Research)
+- Command injection via `git push -o` → RCE on GHES
+- Requires push access; affects GHES < 3.14.24/3.15.19
+- GitHub.com was patched server-side before disclosure
+
+### 4. 🐘 Drupal — CVE-2026-9082 (SQL Injection)
+- **HIGHLY CRITICAL** | **⛔ ACTIVELY EXPLOITED** | CISA KEV listed May 23, 2026
+- SQL Injection in database abstraction API via JSON:API
+- Affects Drupal 8.9–11.3.5; **PostgreSQL deployments specifically targeted**
+- Exceptional patches for unsupported Drupal 8.9/9 branches
+- **Public PoC:** ywh-jfellus/CVE-2026-9082
+
+### 5. 🔥 SonicWall SonicOS — CVE-2026-0204/0205/0206
+- **CVE-2026-0204 CVSS 8.0** | Unauthenticated management interface bypass
+- 597,000+ scanning sessions detected by GreyNoise
+- Gen 6/7/8 firewalls affected; **disable HTTP/HTTPS management until patched**
+- Scanning spike mirrors pattern seen before previous exploitation
+
+### 6. 🖥️ cPanel — CVE-2026-41940 + CVE-2026-48172
+- **CVE-2026-41940 (CVSS 9.8)** | **⛔ ZERO-DAY EXPLOITED for 2 months** before patch
+  - CRLF injection → auth bypass → full server takeover
+  - **1.5M exposed servers; 44,000+ compromised**
+  - Mirai variants and `.sorry` ransomware deployed
+- **CVE-2026-48172 (CVSS 10.0)** | **⛔ ACTIVELY EXPLOITED**
+  - LiteSpeed cPanel Plugin privilege escalation to root
+  - Any cPanel user → arbitrary scripts as root
+
+### 7. 🔴 Redis — CVE-2026-23479/25243/23631/25588/25589
+- **CVE-2026-23479 (CVSS 7.7):** UAF in unblock client → RCE (Redis 7.2–8.6.3)
+- **CVE-2026-25243 (CVSS 7.7):** Invalid memory access in RESTORE → RCE (authenticated)
+- **CVE-2026-23631 (CVSS 6.1):** Lua UAF via replica sync
+- ~600,000+ Redis instances exposed on internet; require AUTH
+
+### 8. 📧 Exim — CVE-2026-45185 (Dead.Letter)
+- **CVSS 9.8** | No workarounds available
+- UAF in BDAT handler during GnuTLS shutdown → single stray byte → heap corruption → unauthenticated RCE
+- Affects Exim 4.97–4.99.2 **(GnuTLS builds only)**; fixed in 4.99.3
+- Exim runs >50% of internet mail servers; default config (STARTTLS+BDAT) is vulnerable
+- **Every cPanel hosting provider using default Exim is affected**
+
+---
+
+### 🎯 PRIORITY PATCHING ORDER (by active exploitation + blast radius):
+1. **cPanel (CVE-2026-41940)** — 1.5M exposed, zero-day for 2 months, Mirai/ransomware in the wild
+2. **Drupal (CVE-2026-9082)** — Active exploitation, PostgreSQL sites at extreme risk
+3. **SharePoint (CVE-2025-53770)** — State-sponsored ToolShell campaign ongoing
+4. **React2Shell (CVE-2025-55182)** — Mass automated attacks, 700+ compromised in 24h
+5. **Exim (CVE-2026-45185)** — No workarounds, 50%+ of mail servers
+6. **SonicWall (CVE-2026-0204)** — 597K scan sessions, pre-exploitation pattern
+7. **Redis (CVE-2026-23479/25243)** — Authenticated RCE, many unprotected instances
+8. **GitHub ES (CVE-2026-3854)** — Patched before exploitation, but check older versions

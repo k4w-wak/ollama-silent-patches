@@ -1,0 +1,225 @@
+{
+  "scan_date": "2026-06-03T00:30:00Z",
+  "scanner": "ai_dashboard_creds_hunter v1.0",
+  "opsec": "Tor SOCKS5 (127.0.0.1:9050)",
+  "exit_ip": "5.45.102.93",
+  "target": "207.244.225.101",
+  "hostname": "vmi2678758.contaboserver.net",
+  "services": [
+    {
+      "port": 22,
+      "service": "SSH",
+      "version": "OpenSSH 9.6p1 Ubuntu 3ubuntu13.16",
+      "auth": true,
+      "risk": "LOW"
+    },
+    {
+      "port": 80,
+      "service": "Caddy HTTP",
+      "version": "Caddy",
+      "auth": false,
+      "risk": "INFO",
+      "notes": "308 redirect to HTTPS"
+    },
+    {
+      "port": 3000,
+      "service": "Open WebUI",
+      "version": "0.6.15",
+      "auth": true,
+      "risk": "HIGH",
+      "cves": ["CVE-2026-44551", "CVE-2026-45400", "CVE-2026-45315", "CVE-2025-64496"],
+      "config": {
+        "enable_signup": false,
+        "enable_api_key": true,
+        "enable_ldap": false,
+        "enable_login_form": true
+      }
+    },
+    {
+      "port": 4000,
+      "service": "Logflare",
+      "version": "unknown",
+      "auth": true,
+      "risk": "LOW"
+    },
+    {
+      "port": 5678,
+      "service": "n8n",
+      "version": "1.100.1",
+      "auth": true,
+      "risk": "CRITICAL",
+      "cves": ["CVE-2025-68613", "CVE-2026-25049", "CVE-2026-27577"],
+      "info_leak": {
+        "endpoint": "/rest/settings",
+        "auth_required": false,
+        "leaked_data": [
+          "instanceId",
+          "posthog_api_key",
+          "database_type",
+          "node_version",
+          "internal_urls",
+          "docker_status",
+          "authentication_method"
+        ]
+      },
+      "leaked_config": {
+        "isDocker": true,
+        "databaseType": "postgresdb",
+        "nodeJsVersion": "22.16.0",
+        "versionCli": "1.100.1",
+        "instanceId": "e71cdec28a6223711480eba9f0c6654efef425b8a78d35fcfa45e4ee23ff6163",
+        "timezone": "America/New_York",
+        "posthog_api_key": "phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo",
+        "authentication_method": "email",
+        "public_api_enabled": true,
+        "swagger_ui_enabled": true
+      }
+    },
+    {
+      "port": 8000,
+      "service": "Kong Proxy (HTTP)",
+      "version": "2.8.1",
+      "auth": true,
+      "risk": "MEDIUM",
+      "cors_misconfig": "Access-Control-Allow-Origin: *"
+    },
+    {
+      "port": 8443,
+      "service": "Kong Proxy (HTTPS)",
+      "version": "2.8.1",
+      "auth": true,
+      "risk": "MEDIUM",
+      "default_cert": true,
+      "cert_cn": "localhost",
+      "cert_org": "Kong",
+      "cors_misconfig": "Access-Control-Allow-Origin: *"
+    },
+    {
+      "port": 11434,
+      "service": "Ollama",
+      "version": "0.9.4",
+      "auth": false,
+      "risk": "CRITICAL",
+      "cves": ["CVE-2026-7482"],
+      "notes": "Running as root (/root/.ollama/), API fully accessible without auth"
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": 1,
+      "cve": "CVE-2026-7482",
+      "severity": "CRITICAL",
+      "cvss": 9.3,
+      "service": "Ollama",
+      "version": "0.9.4",
+      "description": "Bleeding Llama - Heap out-of-bounds read in GGUF model loader",
+      "verified": true,
+      "evidence": "Ollama v0.9.4 confirmed via /api/version, API endpoints accessible without auth"
+    },
+    {
+      "id": 2,
+      "cve": "CVE-2025-68613",
+      "severity": "CRITICAL",
+      "cvss": 9.9,
+      "service": "n8n",
+      "version": "1.100.1",
+      "description": "RCE via workflow expression evaluation",
+      "verified": true,
+      "evidence": "n8n v1.100.1 confirmed via /rest/settings, version < 1.120.4"
+    },
+    {
+      "id": 3,
+      "cve": "CVE-2026-25049",
+      "severity": "CRITICAL",
+      "cvss": 9.4,
+      "service": "n8n",
+      "version": "1.100.1",
+      "description": "Sandbox escape RCE - bypasses CVE-2025-68613 patch via type confusion",
+      "verified": true,
+      "evidence": "n8n v1.100.1 confirmed, version < patch version"
+    },
+    {
+      "id": 4,
+      "cve": "CVE-2026-27577",
+      "severity": "CRITICAL",
+      "cvss": 9.4,
+      "service": "n8n",
+      "version": "1.100.1",
+      "description": "Expression sandbox escape RCE",
+      "verified": true,
+      "evidence": "n8n v1.100.1 confirmed"
+    },
+    {
+      "id": 5,
+      "cve": "CVE-2026-45400",
+      "severity": "HIGH",
+      "service": "Open WebUI",
+      "version": "0.6.15",
+      "description": "SSRF bypass via IP validation",
+      "verified": true,
+      "evidence": "Open WebUI v0.6.15 confirmed, version < 0.9.0"
+    },
+    {
+      "id": 6,
+      "cve": "CVE-2025-64496",
+      "severity": "HIGH",
+      "service": "Open WebUI",
+      "version": "0.6.15",
+      "description": "Direct Connections SSRF/RCE via SSE handling",
+      "verified": true,
+      "evidence": "Open WebUI v0.6.15 confirmed, version < 0.6.35"
+    },
+    {
+      "id": 7,
+      "cve": "CVE-2026-45315",
+      "severity": "MEDIUM",
+      "service": "Open WebUI",
+      "version": "0.6.15",
+      "description": "XSS via polyglot file upload",
+      "verified": true,
+      "evidence": "Open WebUI v0.6.15 confirmed"
+    },
+    {
+      "id": 8,
+      "cve": null,
+      "severity": "HIGH",
+      "service": "n8n",
+      "version": "1.100.1",
+      "description": "Information Disclosure - /rest/settings endpoint leaks full configuration without authentication",
+      "verified": true,
+      "evidence": "Full settings JSON returned without auth headers"
+    },
+    {
+      "id": 9,
+      "cve": null,
+      "severity": "MEDIUM",
+      "service": "Kong",
+      "version": "2.8.1",
+      "description": "CORS misconfiguration - Access-Control-Allow-Origin: *",
+      "verified": true,
+      "evidence": "Kong proxy responses include wildcard CORS header"
+    },
+    {
+      "id": 10,
+      "cve": null,
+      "severity": "MEDIUM",
+      "service": "Kong",
+      "version": "2.8.1",
+      "description": "Default TLS certificate - CN=localhost, O=Kong",
+      "verified": true,
+      "evidence": "TLS cert subject: C=US, ST=California, L=San Francisco, O=Kong, OU=IT Department, CN=localhost"
+    },
+    {
+      "id": 11,
+      "cve": null,
+      "severity": "MEDIUM",
+      "service": "Ollama",
+      "version": "0.9.4",
+      "description": "Running as root - /root/.ollama/ path leaked in error messages",
+      "verified": true,
+      "evidence": "Error message: open /root/.ollama/models/manifests/..."
+    }
+  ],
+  "exposed_files": [],
+  "default_creds": []
+}

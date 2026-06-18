@@ -1,0 +1,73 @@
+# === DEFAULT: IGNORE EVERYTHING ===
+/*
+
+# === ONLY OUR ORIGINAL CODE ===
+!.gitignore
+!.github/
+!README.md
+!02_grok_engine/
+!_projects/
+!pocs/
+!reports/
+!swarm_v4/
+
+# === IGNORE WITHIN INCLUDED DIRS ===
+**/venv/
+**/.venv/
+**/venv.windows.bak/
+**/__pycache__/
+*.py[cod]
+**/.git/
+02_grok_engine/tools_bin/
+02_grok_engine/ai_osint_ref/
+**/node_modules/
+**/.env
+**/.env.*
+!**/.env.example
+**/*.key
+**/*.pem
+**/*.p12
+**/secrets/
+**/.ollama_api_key
+**/hydroxide_bridge_pw
+**/azure_config/
+**/claude_config/
+**/aider_config/
+**/bbot_config/
+**/nvm_config/
+**/factory_config/
+**/state-snapshots/
+**/scan_results/
+**/_archive/
+**/_data/
+**/_desktop/
+**/_misc/
+**/_scripts/
+**/_identity/
+.DS_Store
+Thumbs.db
+desktop.ini
+.megaignore
+.gitconfig
+*.hex
+*.log
+*.har
+*.egg-info/
+**/megalinter-reports/
+**/scans/
+# Logs
+**/logs/
+**/*.log
+# Venvs (catch all)
+02_grok_engine/2/
+02_grok_engine/venv*/
+**/venv*/
+# OMP config (may have tokens)
+02_grok_engine/.omp/
+# Deep dive data
+02_grok_engine/8hour_deep_dive/
+# === LARGE FILES ===
+02_grok_engine/bb_turbo_20260516_232902/alterx.txt
+_projects/myway_gdpr_klage/03_beviser/screenshot_api_overview.png
+_projects/myway_gdpr_klage/03_beviser/screenshot_api_detail.png
+02_grok_engine/mobile_tools/adb

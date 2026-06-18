@@ -1,0 +1,420 @@
+# 🎯 Unconventional Shodan/Censys Dorks for Hidden AI/ML Infrastructure
+
+Research compiled from: **7WaySecurity/ai_osint**, **Nicholas-Kloster/AI-LLM-Infrastructure-OSINT**, **Adyrex/advanced-shodan-queries**, **awesome-censys-queries**, Cisco Talos, SentinelOne, Censys research (2025–2026).
+
+---
+
+## 1) 🐳 Exposed Docker APIs (Port 2375/2376)
+
+Docker Remote API on the internet = **full host RCE**. Attackers spin cryptominers, escalate to host. Heavily targeted by botnets (Kinsing, TeamTNT).
+
+### Shodan
+```
+product:"Docker" port:2375
+port:2375 "Docker" http.status:200
+port:2375 "containers/json" 
+port:2376 "Docker"
+"Docker Remote API" port:2375
+"Server: Docker" port:2375 -"403"
+```
+
+### Censys
+```
+services.port=2375 AND services.http.response.headers.server: "Docker"
+services.port=2375 AND services.http.response.body: "containers"
+services.port=2376 AND services.http.response.headers.server: "Docker"
+```
+
+### AI/ML relevance: MLOps teams deploy model training containers via Docker. Exposed APIs leak training data, model artifacts, and allow container escape to GPU hosts.
+
+**Est. exposure:** ~2,000–5,000 unauthenticated Docker APIs on Shodan at any time.
+
+---
+
+## 2) ☸️ Kubernetes API Servers (Port 6443/8443/2379/10250)
+
+K8s is the backbone of ML training infrastructure. Exposed clusters = stolen secrets, model exfiltration, cryptojacking GPU nodes.
+
+### Shodan
+```
+product:"Kubernetes" port:6443
+http.title:"Kubernetes Dashboard" port:8443
+"kubernetes" port:6443 http.status:200
+port:2379 "etcd"                          # etcd — ALL cluster data
+port:10250 "kubelet"                       # kubelet API — pod exec
+http.title:"Kubernetes Dashboard"
+"k8s" port:6443
+"apiserver" port:6443
+```
+
+### Censys
+```
+services.kubernetes.pod_names: *
+services.port=6443 AND services.http.response.body: "kubernetes"
+services.port=2379 AND services.http.response.body: "etcd"
+services.port=10250 AND services.http.response.body: "kubelet"
+```
+
+### Refinement: Find unauthenticated K8s
+```
+"kubernetes" port:6443 -"401" -"403" http.status:200
+http.title:"Kubernetes Dashboard" -"login" -"Auth"
+```
+
+**Est. exposure:** 380,000+ K8s clusters publicly visible (Shodan, 2026). ~243,469 with exposed kubelets (Trend Micro).
+
+---
+
+## 3) 🏛️ HashiCorp Consul/Nomad UIs
+
+Consul exposes service mesh, KV store, and health checks. Nomad exposes job specs (often containing ML training job definitions, model paths, credentials).
+
+### Shodan — Consul
+```
+http.title:"Consul by HashiCorp"
+http.title:"Consul by HashiCorp" port:8500
+"Consul by HashiCorp" "/ui/"
+port:8500 "Consul"
+```
+
+### Shodan — Nomad
+```
+http.title:"Nomad by HashiCorp"
+port:4646 "Nomad"
+port:4646 "nomad"
+http.html:"nomad" port:4646
+```
+
+### Censys
+```
+same_service(services.http.response.html_title="Consul by HashiCorp" AND services.http.request.uri: "*/ui/")
+services.port=8500 AND services.http.response.html_title: "Consul by HashiCorp"
+services.port=4646 AND services.http.response.body: "nomad"
+```
+
+### AI/ML relevance: ML pipelines (Kubeflow, custom) often use Consul for service discovery and Nomad for scheduling training jobs. Exposed UIs reveal model training configs, GPU allocation, and internal service topology.
+
+---
+
+## 4) 📊 Prometheus/Grafana Metrics Endpoints
+
+Prometheus `/metrics` endpoints leak internal service names, resource usage, container labels. Grafana dashboards expose K8s pod names, GPU metrics, model inference stats, and often have default `admin:admin`.
+
+### Shodan — Prometheus
+```
+http.title:"Prometheus Time Series Collection"
+"prometheus" port:9090
+"/metrics" port:9090
+http.html:"prometheus" "/metrics"
+```
+
+### Shodan — Grafana
+```
+http.title:"Grafana" port:3000
+http.title:"Grafana" -"login" -"Sign in"
+http.title:"Grafana" port:3000 http.status:200
+http.favicon.hash:2123863676              # Grafana favicon hash
+"Grafana" port:3000 -"401" -"403"
+```
+
+### Censys
+```
+same_service(services.http.response.html_title: "node exporter" AND services.http.response.body: "/metrics")
+services.port=3000 AND services.http.response.html_title: "Grafana"
+services.port=9090 AND services.http.response.body: "prometheus"
+```
+
+### AI/ML twist: Search for ML-specific metrics:
+```
+"gpu" "prometheus" "/metrics"
+"torchserve" "/metrics"
+"tensorflow_serving" "/metrics"
+"nvidia_gpu" "/metrics" port:9090
+```
+
+**Est. exposure:** 200,000+ Grafana instances on Shodan.
+
+---
+
+## 5) 🔮 GraphQL Introspection Endpoints
+
+GraphQL introspection leaks the **entire API schema** — types, mutations, queries. For AI platforms, this reveals model endpoints, user data queries, admin mutations.
+
+### Shodan
+```
+"/graphql" "graphql" port:443
+http.html:"graphql" "graphiql"
+http.title:"GraphiQL"
+"__schema" port:443
+"/graphiql" port:80
+"IntrospectionQuery" port:443
+```
+
+### Censys
+```
+services.http.response.body: "__schema" AND services.http.request.uri: "*/graphql"
+services.http.response.html_title: "GraphiQL"
+```
+
+### Pro-tip: Force introspection with SSE/POST
+```
+curl -s -X POST https://TARGET/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{__schema{types{name}}}}"}'
+```
+
+---
+
+## 6) 📡 Server-Sent Events (SSE) Endpoints
+
+SSE endpoints are critical for AI: real-time model inference streaming, LLM token-by-token output, MCP server communication. CVE-2026-33032 (nginx-ui MCP) exploits SSE for RCE.
+
+### Shodan
+```
+"text/event-stream" port:443
+"text/event-stream" port:8080
+"text/event-stream" port:3000
+http.html:"mcp" "tools" port:3000
+http.html:"Model Context Protocol" port:8080
+http.html:"mcp_message" port:443
+```
+
+### Censys
+```
+services.http.response.headers.content_type: "text/event-stream"
+services.http.response.body: "event:" AND services.http.response.headers.content_type: "text/event-stream"
+```
+
+### AI/ML twist: MCP (Model Context Protocol) servers
+```
+# MCP servers — 200,000+ vulnerable estimated (Ox Security, April 2026)
+http.title:"Nginx UI" port:443
+http.title:"Nginx UI" "/mcp"
+http.html:"sse" "mcp" port:3000
+```
+
+---
+
+## 7) 🔑 OpenID Configuration Leaks
+
+`.well-known/openid-configuration` leaks all OAuth2/OIDC endpoints, token URLs, JWKS URIs, and supported scopes. For AI platforms (Keycloak, Auth0), this reveals authentication architecture.
+
+### Shodan
+```
+"/.well-known/openid-configuration" http.status:200
+"openid-configuration" port:443
+"jwks_uri" "/.well-known/openid-configuration"
+http.html:"openid-configuration" 
+"authorization_endpoint" "token_endpoint" "/.well-known/"
+```
+
+### Censys
+```
+services.http.response.body: "openid-configuration" AND services.http.request.uri: "*/.well-known/openid-configuration"
+services.http.response.body: "jwks_uri" AND services.http.response.body: "authorization_endpoint"
+```
+
+### AI/ML twist: AI platforms using Keycloak
+```
+"Keycloak" "/.well-known/openid-configuration"
+"realm" "/.well-known/openid-configuration" port:8080
+```
+
+---
+
+## 8) 🪣 Exposed MinIO/S3 Buckets
+
+MinIO is the #1 S3-compatible storage for AI/ML. It stores training data, model weights, datasets. Default: **no auth**.
+
+### Shodan
+```
+http.title:"MinIO Console" port:9000
+http.title:"MinIO Console" port:9001
+http.title:"MinIO Browser"
+"MinIO" port:9000
+"MinIO Object Storage" port:9000
+"X-Amz-Request-Id" port:9000
+```
+
+### Censys
+```
+services.port=9000 AND services.http.response.html_title: "MinIO Console"
+services.port=9001 AND services.http.response.html_title: "MinIO Console"
+services.http.response.headers.server: "MinIO"
+services.http.response.body: "minio" AND services.port: 9000
+```
+
+### Refinement: Find unauthenticated MinIO
+```
+http.title:"MinIO Console" -"login" -"401" http.status:200
+"MinIO" port:9000 "ListBuckets"
+```
+
+**Est. exposure:** ~10,000+ MinIO instances publicly accessible.
+
+---
+
+## 9) 📓 Jupyter Notebooks
+
+Jupyter is the #1 tool for ML/data science. Exposed notebooks = access to training code, API keys in cells, model weights on disk. Actively targeted by botnets.
+
+### Shodan
+```
+http.title:"Jupyter Notebook" port:8888
+http.title:"JupyterLab" port:8888
+port:8888 "jupyter" -"Authenticated"
+"Jupyter" port:8888 http.status:200
+"Jupyter Notebook" "tree" port:8888
+http.title:"Home Page - Select or create a notebook" port:8888
+```
+
+### Censys
+```
+services.port=8888 AND services.http.response.html_title: "Jupyter"
+services.port=8888 AND services.http.response.html_title: "JupyterLab"
+services.http.response.body: "jupyter" AND services.port: 8888
+```
+
+### AI/ML twist: Jupyter with GPUs
+```
+"Jupyter" "tensor" port:8888
+"Jupyter" "cuda" port:8888
+"Jupyter Notebook" "gpu" port:8888
+```
+
+**Est. exposure:** ~10,000+ Jupyter instances on Shodan (7WaySecurity/ai_osint).
+
+---
+
+## 10) 🌬️ Airflow UIs
+
+Apache Airflow orchestrates ML pipelines (DAGs). Exposed UI reveals DAG definitions, connection credentials, variable values, and XCom data (which can contain model paths, dataset references).
+
+### Shodan
+```
+http.title:"Airflow" "DAGs"
+http.title:"Airflow" port:8080
+"DAGs" "Airflow" http.status:200
+http.title:"Airflow - DAGs"
+```
+
+### Censys
+```
+services.http.response.html_title: "Airflow"
+services.http.response.body: "DAGs" AND services.http.response.html_title: "Airflow"
+```
+
+### Refinement: Find unauthenticated Airflow
+```
+http.title:"Airflow" -"login" -"401" http.status:200
+http.title:"Airflow" "DAGs" "Connections"
+```
+
+---
+
+## 11) 🌸 Flower / Celery Monitoring
+
+Flower monitors Celery task queues. AI/ML teams use Celery for async inference, batch predictions, training jobs. Exposed Flower = visibility into all task payloads (often containing model inputs, API keys, user data).
+
+### Shodan
+```
+http.title:"Flower" port:5555
+port:5555 "Celery" "Flower"
+http.title:"Celery Flower" port:5555
+port:5555 "flower" http.status:200
+"broker" "celery" port:5555
+```
+
+### Censys
+```
+services.port=5555 AND services.http.response.html_title: "Flower"
+services.port=5555 AND services.http.response.body: "celery"
+services.http.response.html_title: "Celery Flower"
+```
+
+### Refinement: Find active Flower instances
+```
+http.title:"Flower" port:5555 -"401" -"403" http.status:200
+port:5555 "workers" "tasks" "Flower"
+```
+
+**Est. exposure:** 50+ confirmed exposed Flower dashboards (bug bounty researcher Vijeta Reigns found 50+ in a single hunt).
+
+---
+
+## 🔥 BONUS: AI-Specific Infrastructure Dorks
+
+These are the **most critical** new dorks from 2025-2026 research:
+
+### Ollama (175,000+ exposed!)
+```
+"Ollama is running" port:11434
+port:11434 http.html:"Ollama"
+port:11434 "api/tags"
+```
+
+### vLLM / OpenAI-Compatible
+```
+port:8000 "openai" "model"
+"/v1/chat/completions" port:8000
+"/v1/models" port:8000
+```
+
+### MLflow (No auth by default, CVE-2026-0545 CVSS 9.1)
+```
+http.title:"MLflow" port:5000
+port:5000 "/mlflow"
+```
+
+### Qdrant (No auth by default)
+```
+port:6333 "qdrant"
+port:6333 "/collections"
+```
+
+### TensorBoard
+```
+http.title:"TensorBoard" port:6006
+```
+
+### Kubeflow
+```
+http.title:"Kubeflow" port:8080
+```
+
+---
+
+## 📐 Master Censys Queries — Cross-Correlation
+
+Find AI/ML infrastructure by **combining signals**:
+
+```
+# Find K8s clusters running AI workloads
+services.kubernetes.pod_names: * AND services.http.response.body: "tensorflow"
+
+# Find Grafana dashboards on cloud providers
+services.http.response.html_title: "Grafana" AND autonomous_system.name: "AMAZON"
+
+# Find Docker APIs in specific countries
+services.port=2375 AND services.http.response.headers.server: "Docker" AND location.country: "US"
+
+# Find all unauth AI services on a target org
+services.http.response.html_title: {"Ollama", "MLflow", "Jupyter", "Airflow"} AND autonomous_system.organization: "TARGET_ORG"
+```
+
+---
+
+## ⚡ Pro-Tips for AI/ML Hunting
+
+| Technique | Query Pattern |
+|-----------|--------------|
+| **GPU hunting** | `"nvidia" "/metrics" port:9090` |
+| **Model serving** | `"torchserve" OR "tensorflow_serving" port:8080` |
+| **ML data leaks** | `"dataset" "model" "/api" port:443` |
+| **Training cluster** | `"ray" "dashboard" port:8265` |
+| **Experiment tracking** | `"mlflow" "experiment" port:5000` |
+| **Non-default ports** | `"Ollama" port:80 OR port:443 OR port:8080` |
+| **Cloud filtering** | `org:"Hetzner" "Ollama" port:11434` |
+| **Unauth filter** | `-"401" -"403" -"login" http.status:200` |
+
+> **Key insight from Censys research**: 25%+ of Ollama instances run on **non-default ports** (443, 80, 8080). Port-only scanning misses a huge fraction. Always use content-based fingerprinting alongside port filters.

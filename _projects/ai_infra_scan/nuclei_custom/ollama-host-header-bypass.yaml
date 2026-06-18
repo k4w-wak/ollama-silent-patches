@@ -1,0 +1,34 @@
+id: ollama-host-header-bypass
+
+info:
+  name: Ollama Host Header Bypass via .local/.internal TLD
+  author: admin_user
+  severity: high
+  description: |
+    Ollama's allowedHost function allows any hostname ending in .local, .internal, or .localhost,
+    enabling DNS rebinding and host header injection attacks. An attacker can register
+    evil.internal or attacker.local domains and bypass the host check middleware.
+  reference:
+    - https://github.com/ollama/ollama/blob/main/server/routes.go
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N
+    cvss-score: 7.5
+    cwe-id: CWE-642
+  tags: ollama,host-header,bypass,ssrf,ai
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/tags"
+    headers:
+      Host: "evil.internal"
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "models"
+          - "modified_at"
+        part: body
+      - type: status
+        status:
+          - 200

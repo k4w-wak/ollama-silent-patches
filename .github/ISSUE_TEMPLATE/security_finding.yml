@@ -1,0 +1,23 @@
+name: Security Finding
+description: Report a security finding
+labels: ["security"]
+body:
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: Describe the security finding
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Info
+    validations:
+      required: true

@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-04-29 23:50:24",
+  "level": "HIGH",
+  "category": "NETWORK",
+  "message": "Mistenkelige lyttende porte fundet: 2 stk",
+  "hostname": "DESKTOP-P7SU64O",
+  "user": "admin_user"
+}

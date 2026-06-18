@@ -1,0 +1,52 @@
+id: ollama-cors-wildcard-origins
+
+info:
+  name: Ollama CORS Wildcard Origin Bypass
+  author: admin_user
+  severity: high
+  description: |
+    Ollama allows wildcard origins including app://*, file://*, taur://*, vscode-webview://*
+    which enables any application or browser extension to make cross-origin requests.
+    Combined with AllowWildcard=true and AllowBrowserExtensions=true, this creates a
+    significant attack surface for data exfiltration and unauthorized model access.
+  reference:
+    - https://github.com/ollama/ollama/blob/main/server/routes.go
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N
+    cvss-score: 7.1
+    cwe-id: CWE-942
+  tags: ollama,cors,misconfig,ssrf,ai
+
+http:
+  - method: OPTIONS
+    path:
+      - "{{BaseURL}}"
+    headers:
+      Origin: "app://malicious-app"
+      Access-Control-Request-Method: "POST"
+      Access-Control-Request-Headers: "Content-Type"
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "Access-Control-Allow-Origin: app://malicious-app"
+        part: header
+      - type: status
+        status:
+          - 204
+  - method: OPTIONS
+    path:
+      - "{{BaseURL}}"
+    headers:
+      Origin: "file://malicious"
+      Access-Control-Request-Method: "POST"
+      Access-Control-Request-Headers: "Content-Type"
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "Access-Control-Allow-Origin: file://malicious"
+        part: header
+      - type: status
+        status:
+          - 204

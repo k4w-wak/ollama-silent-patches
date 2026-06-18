@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-04-29 23:40:20",
+  "level": "CRITICAL",
+  "category": "PROCESS",
+  "message": "Mistenkelig proces fundet: admin_user     1866  0.0  0.0 381116  6912 ?        Ssl  21:02   0:00 /usr/libexec/at-spi-bus-launcher",
+  "hostname": "DESKTOP-P7SU64O",
+  "user": "admin_user"
+}

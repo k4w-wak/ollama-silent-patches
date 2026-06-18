@@ -1,0 +1,37 @@
+id: ollama-model-pull-ssrf
+
+info:
+  name: Ollama Model Pull SSRF via Insecure Flag
+  author: admin_user
+  severity: high
+  description: |
+    Ollama's /api/pull endpoint accepts an "insecure" flag that disables TLS certificate
+    verification when pulling models. This can be combined with custom registry URLs to
+    perform SSRF attacks and man-in-the-middle attacks on model downloads.
+  reference:
+    - https://github.com/ollama/ollama/blob/main/server/routes.go
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N
+    cvss-score: 7.5
+    cwe-id: CWE-918
+  tags: ollama,ssrf,insecure,ai
+
+http:
+  - method: POST
+    path:
+      - "{{BaseURL}}/api/pull"
+    headers:
+      Content-Type: "application/json"
+    body: |
+      {"name":"test","insecure":true}
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "status"
+          - "pulling"
+        part: body
+        condition: and
+      - type: status
+        status:
+          - 200

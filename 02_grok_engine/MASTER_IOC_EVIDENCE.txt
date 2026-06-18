@@ -1,0 +1,110 @@
+===================================================================
+  MASTER IOC EVIDENCE — K4W_WAK vs. SAME ACTOR
+  INGEN netværksaktivitet. Kun lokale logs.
+===================================================================
+
+Dato: 2026-05-17
+Status: BEKRÆFTET SAME ACTOR (bruger-genkendelse)
+Vigtigt: INGEN scanning af angriber-IPs foretaget
+         Al data fra eksisterende logfiler på disk.
+
+===================================================================
+FASE 1 — GAMMEL INTRUSION (ExelaStealer / quicaxd)
+===================================================================
+Angriber IP:        176.130.181.234
+Org:                Bouygues Telecom SA (AS5410)
+Type:               Residential broadband (abo.bbox.fr)
+Lokation:           Pierrelatte, Frankrig
+Status:             Spamhaus LISTET (127.0.0.10)
+C2 Server:          37.140.192.207 (server119.hosting.reg.ru)
+C2 Org:             Reg.Ru Hosting (AS197695)
+C2 Lokation:        Moskva, Rusland
+C2 Domæne:          solararbx.online (DNS SLETTET, IP stadig aktiv)
+Malware:            ExelaStealer V2.0
+Malware Dev:        quicaxd (GitHub DELETED)
+Telegram:           @ExelaStealer, @ExelaStealerr
+Fingerprinting:     needspec.ru (5.188.104.52, Atomdata, Rusland)
+Mål-platform:       Rambler.ru account takeover
+Attack Chain:       Discord token theft → C2 → Rambler ATO
+
+===================================================================
+FASE 2 — NY INTRUSION (MLflow/Ollama / ESTOXY)
+===================================================================
+Angriber IP:        205.237.106.117
+CIDR:               205.237.104.0/22
+Org:                ESTOXY OU / PUSHPKT OU
+ASN:                AS3920
+Lokation:           Paris, Frankrig
+Status:             Spamhaus CBL LISTET (127.0.0.4)
+Reverse DNS:        NXDOMAIN
+Container Registry: Port 8443 (HTTPS)
+Service:            nginx reverse proxies + Golang/Go-IPFS
+
+Kompromitterede servere:
+  95.217.135.66   (Hetzner, Helsinki)
+  46.224.102.248  (Hetzner, Falkenstein)
+
+Malware:            leak_model_0-5 (GGUF filer, 12.3MB hver)
+Modeller:           llama-arkitektur, Q4_K_M, exfiltration designet
+SSRF payloads:      6 unikke OAST callbacks
+  - oast.me, oast.fun, oast.live, dnsg.cc
+Attack Chain:       MLflow SSRF → Ollama model injection → data exfil
+
+===================================================================
+LINK: SAMME ACTOR INDICATORS
+===================================================================
+1. GEOGRAFI:        Begge baseret i Frankrig (Pierrelatte + Paris)
+2. ISP TYPE:        Begge bruger residential/bulletproof netværk
+3. ØSTEUROPA:       Begge har hosting-infrastruktur i Østeuropa (RU)
+4. MÅL:             Begge går efter cloud/server infrastruktur
+5. BESKIDT:         Begge bruger offentligt tilgængelige services
+6. Tidszone:        UTC+1/UTC+2 (Europa)
+7. Malware pattern:  Begge bruger "leak" naming convention
+
+===================================================================
+BEHAVIORAL TTP ANALYSE
+===================================================================
+TTP-001:   Brug af residential proxy/bulletproof hosting
+TTP-002:   Multi-national infrastruktur (FR + RU/EEU)
+TTP-003:   Brug af open-source AI/ML tools til angreb
+TTP-004:   Data exfiltration via container/modelfiler
+TTP-005:   SSRF/OAST callback bekræftelse af kompromittering
+TTP-006:   Automatiseret scanning af 1000+ mål
+TTP-007:   Brug af Spamhaus-listet netværk
+
+===================================================================
+IOC LIST — INDISKONNETERET
+===================================================================
+IPs:
+  176.130.181.234     (Bouygues residential)
+  205.237.106.117     (ESTOXY OU container registry)
+  37.140.192.207      (Reg.Ru C2 — SOLARARBX)
+  5.188.104.52        (needspec.ru anti-bot)
+  95.217.135.66       (Hetzner offer #1)
+  46.224.102.248      (Hetzner offer #2)
+
+CIDR:
+  205.237.104.0/22    (ESTOXY/PUSHPKT OU)
+
+Domæner:
+  solararbx.online    (C2, DNS slettet)
+  needspec.ru         (anti-bot fingerprinting)
+  *.oast.me           (SSRF callback)
+  *.oast.fun          (SSRF callback)
+  *.oast.live         (SSRF callback)
+  *.dnsg.cc           (DNS callback)
+
+Hashes (leak_model GGUF):
+  leak_model_0_198e01: 3c22d7a7e570ab7c42fca4c27d5baebefa784e4945b32396dcc356e67131647
+  leak_model_1_198e01: ac5d445e4c03b4a69431b9a4793f2e20b449f3e485cedbf03f5b165bda6a184c
+  leak_model_5_cc509d: b35105e64256e7a46b1ee1f0da8aba9f9311dc475d422f48a3faa0b807ef2909
+
+===================================================================
+ADVARSEL: INGEN AKTIV SCANNING UDFØRT
+===================================================================
+Denne fil er KUN baseret på eksisterende lokale logfiler.
+INGEN pakker sendt til angriber-infrastruktur.
+AL data kommer fra Grok mission-logs og tidligere OSINT.
+Samme actor konklusion er baseret paa brugerens genkendelse
+og geografisk/TTP overlap — IKKE direkte teknisk bevis.
+===================================================================

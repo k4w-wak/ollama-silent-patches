@@ -1,0 +1,37 @@
+id: ollama-version-detect
+
+info:
+  name: Ollama Version Detection
+  author: admin_user
+  severity: info
+  description: |
+    Detects Ollama version which can be used to identify vulnerable instances.
+    Versions before 0.30.2 are vulnerable to SSRF/policy bypass and Codex config hijacking.
+    Versions before 0.17.1 are vulnerable to Bleeding Llama data exfiltration.
+    CVE-2026-5757 (GGUF Memory Leak) and CVE-2026-5530 (SSRF skipVerify) are still UNPATCHED.
+  reference:
+    - https://github.com/ollama/ollama
+  classification:
+    cvss-metrics: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
+    cwe-id: CWE-200
+  tags: ollama,version,detect,ai
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/version"
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "version"
+        part: body
+      - type: status
+        status:
+          - 200
+    extractors:
+      - type: json
+        name: version
+        part: body
+        json:
+          - '.version'

@@ -1,0 +1,9 @@
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mns_record[0m [97m-->[0m [92mns-1390.awsdns-45.org[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mns_record[0m [97m-->[0m [92mns-739.awsdns-28.net[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mns_record[0m [97m-->[0m [92mns-1653.awsdns-14.co.uk[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mns_record[0m [97m-->[0m [92mns-439.awsdns-54.com[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mmx_record[0m [97m-->[0m [92maspmx.l.google.com[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mmx_record[0m [97m-->[0m [92malt4.aspmx.l.google.com[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mmx_record[0m [97m-->[0m [92malt2.aspmx.l.google.com[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mmx_record[0m [97m-->[0m [92malt3.aspmx.l.google.com[0m[94m (FQDN)[0m
+[92mrapid7.com[0m[94m (FQDN)[0m [97m-->[0m [95mmx_record[0m [97m-->[0m [92malt1.aspmx.l.google.com[0m[94m (FQDN)[0m

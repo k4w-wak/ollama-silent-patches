@@ -1,0 +1,40 @@
+Research complete. Here's the comprehensive breakdown:
+
+---
+
+# 🔥 Bug Bounty Goldplates: 10 Unique Vuln Classes People Miss
+
+## Research Summary
+
+All 10 categories researched with real disclosed examples and bounty amounts. Full report saved to `~/Desktop/bug_bounty_goldplates_research.md`.
+
+### Top Findings by Impact:
+
+| # | Vulnerability | Key Example | Max Bounty |
+|---|---|---|---|
+| **1** | **HTTP Request Smuggling (CDN)** | CVE-2025-4366 Pingora + Kettle's DEFCON 33 multi-CDN desync | **$200,000+** (2 weeks) |
+| **2** | **Web Cache Deception** | PayPal CDN caching authenticated pages via `.css` suffix | **$4,700** |
+| **3** | **OAuth2 redirect_uri Bypass** | JWT token theft via redirect_uri manipulation (Oct 2025) | **$4,500** |
+| **4** | **JWT Algorithm Confusion** | CVE-2024-37568 Authlib + 6 new critical JWT CVEs in 2025 | **Full ATO** |
+| **5** | **Second-Order SQLi** | CVE-2024-12276 Ultimate Member WP plugin | **Rare = higher pay** |
+| **6** | **Mass Assignment via API** | Adding `isAdmin: true` to JSON bodies | **$7,000+** |
+| **7** | **Prototype Pollution** | CVE-2025-13465 Lodash deletion variant + expr-eval RCE | **RCE chains** |
+| **8** | **Race Conditions** | HackerOne #429026 — multiple retest payments | **$2,500** |
+| **9** | **IDOR with Predictable UUIDs** | PayPal #415081 + banking IDOR | **$4,500** |
+| **10** | **SSTI** | Uber #125980 Jinja2 email RCE | **Critical/RCE** |
+
+### The Biggest Goldplates (most under-tested):
+
+1. **HTTP Request Smuggling via CDNs** — $200K+ proven. Most hunters don't test CDN-to-origin desync.
+2. **Second-Order SQLi** — Invisible to ALL scanners. Requires manual data-flow tracing.
+3. **Web Cache Deception** — Consistently confused with cache poisoning. Simple `.css` trick works on major sites.
+4. **JWT Algorithm Confusion** — 6+ critical CVEs in 2025 alone. Libraries STILL don't validate `alg`.
+5. **Prototype Pollution "deletion" variant** — CVE-2025-13465 is a NEW attack vector (deleting properties, not injecting).
+
+### Critical New Developments (2024-2025):
+
+- **James Kettle's "HTTP/1 Must Die"** at DEFCON 33: New desync classes across multiple CDNs, $200K+ in bounties
+- **CVE-2025-4366**: Cloudflare Pingora request smuggling enabling cache poisoning
+- **CVE-2025-13465**: Lodash prototype pollution now includes **deletion** attacks via `_.unset()` and `_.omit()`
+- **PortSwigger URL Validation Bypass Cheat Sheet** (Sep 2024): Comprehensive OAuth redirect_uri bypass reference
+- **CVE-2024-37568**: Authlib algorithm confusion — missing `alg` defaults to HMAC verification

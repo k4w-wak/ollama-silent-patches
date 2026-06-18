@@ -1,0 +1,8 @@
+=== CHALLENGE 2: TRUE OSINT ===
+Target: rapid7.com
+INGEN port scans. Kun OSINT.
+Maal: 5 subdomains + 1 easter egg.
+Tid: 10 min.
+Point: 100.
+
+Start: /mission CHALLENGE 2 GO

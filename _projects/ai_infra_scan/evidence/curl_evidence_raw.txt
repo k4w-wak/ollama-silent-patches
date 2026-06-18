@@ -1,0 +1,186 @@
+=== CURL EVIDENCE ===
+Target: 207.244.225.101 (vmi2678758.contaboserver.net)
+Date: 2026-06-03 13:34:44 UTC
+
+============================================
+FINDING 1: Logflare Unauthenticated Dashboard (CVSS 9.8)
+============================================
+
+--- Request: GET /dashboard ---
+HTTP/1.1 200 OK
+date: Wed, 03 Jun 2026 13:34:46 GMT
+content-length: 30689
+vary: accept-encoding
+set-cookie: _logflare_key=SFMyNTY.g3QAAAACbQAAAAtfY3NyZl90b2tlbm0AAAAYY002T2t5dlg0bHVOZWQtbmZ6bmFNbG85bQAAAAd1c2VyX2lkYQE.nyKWBFdi2-e4Y0pYrtDWe5TO1UOyREYlyg_-2FniVTw; path=/; HttpOnly
+content-type: text/html; charset=utf-8
+cache-control: max-age=0, private, must-revalidate
+x-request-id: GLWVktcfNvj_w8sAClSj
+referrer-policy: same-origin
+x-content-type-options: nosniff
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+content-security-policy: default-src 'self';connect-src 'self' wss://logflare.app https://api.github.com;script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://buttons.github.io https://platform.twitter.com https://cdnjs.cloudflare.com https://js.stripe.com;style-src 'self' 'unsafe-inline' https://use.fontawesome.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.github.com;img-src 'self' data: https://*.googleusercontent.com https://www.gravatar.com https://avatars.githubusercontent.com https://platform.slack-edge.com;font-src 'self' https://use.fontawesome.com;frame-src 'self' https://platform.twitter.com https://install.cloudflareapps.com https://datastudio.google.com https://js.stripe.com https://www.youtube.com https://lookerstudio.google.com/;
+logflare-node: logflare@127.0.0.1
+logflare-user-id: 1
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Easily access your Cloudflare, Vercel & Elixir logs in a centralized web-based log management solution.">
+    <meta name="author" content="">
+    <title>Logflare | Cloudflare, Vercel &amp; Elixir Logging</title>
+    <link rel="stylesheet" href="/js/app-1bc94040eb5d062a5b3c81059e5261ea.css?vsn=d">
+    <link rel="apple-touch-icon" sizes="57x57" href="/images/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/images/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/images/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/images/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/manifest-36f69007a9035164077cfb6ad1a87087.json?vsn=d">
+    <meta name="msapplication-TileColor" content="#5eeb8f">
+    <meta name="msapplication-TileImage" content="/images/ms-icon-144x144.png">
+    <meta name="theme-color" content="#5eeb8f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="slack-app-id" content="AQEDJ7H7G">
+    <link rel="icon" href="/images/favicon-05645b416d5c093aa43bffcf73b7fe3d.ico?vsn=d">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+<meta content="ESdFLl0mJzRBNR4XDidZG1YRAQ0aKShXrjsa6_QluYkYkCtu0kolWEGn" name="csrf-token">
+
+--- Request: GET /api/health ---
+HTTP/1.1 404 Not Found
+date: Wed, 03 Jun 2026 13:34:46 GMT
+content-length: 1070
+vary: accept-encoding
+content-type: text/html; charset=utf-8
+cache-control: max-age=0, private, must-revalidate
+
+<div class="container-fluid errors hero pb-5">
+    <div class="container my-5">
+        <div class="row cta">
+            <div class="col-lg-10 order-lg-1">
+                <div class="row">
+
+  <div class="col-lg-7">
+    <h1>404</h1>
+    <h2 class="text-white mb-3">Page not found </h2>
+    <p>Get back <a href="/">to homepage</a></p>
+  </div>
+
+                    <div class="col-lg-5">
+                        <h2 class="mb-3">Looking for something else?</h2>
+<p>Install the <a href="https://cloudflareapps.com/apps/logflare" target="_blank">Cloudflare app</a></p>
+<p>Setup our <a href="https://github.com/Logflare/logflare_logger_backend" target="_blank">Elixir Logger backend</a></p>
+<p>Check out the <a href="https://vercel.co/integrations/logflare" target="_blank">Logflare Vercel app</a></p>
+<p>Javascript? Use our <a href="https://github.com/Logflare/pino-logflare" target="_blank">Pino transport</a></p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1">
+            </div>
+        </div>
+    </div>
+</div>
+
+============================================
+FINDING 2: n8n v1.100.1 Configuration Leak (CVSS 9.9)
+============================================
+
+--- Request: GET /rest/settings ---
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Length: 3271
+ETag: W/"cc7-oHJD5hRXEnec83Vg0We2jZyAxlg"
+Vary: Accept-Encoding
+Date: Wed, 03 Jun 2026 13:34:47 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"inE2ETests":false,"isDocker":true,"databaseType":"postgresdb","previewMode":false,"endpointForm":"form","endpointFormTest":"form-test","endpointFormWaiting":"form-waiting","endpointMcp":"mcp","endpointMcpTest":"mcp-test","endpointWebhook":"webhook","endpointWebhookTest":"webhook-test","endpointWebhookWaiting":"webhook-waiting","saveDataErrorExecution":"all","saveDataSuccessExecution":"all","saveManualExecutions":true,"saveExecutionProgress":false,"executionTimeout":-1,"maxExecutionTimeout":3600,"workflowCallerPolicyDefaultOption":"workflowsFromSameOwner","timezone":"America/New_York","urlBaseWebhook":"http://localhost:5678/","urlBaseEditor":"http://localhost:5678","binaryDataMode":"default","nodeJsVersion":"22.16.0","versionCli":"1.100.1","concurrency":-1,"authCookie":{"secure":true},"releaseChannel":"stable","oauthCallbackUrls":{"oauth1":"http://localhost:5678/rest/oauth1-credential/callback","oauth2":"http://localhost:5678/rest/oauth2-credential/callback"},"versionNotifications":{"enabled":true,"endpoint":"https://api.n8n.io/api/versions/","infoUrl":"https://docs.n8n.io/hosting/installation/updating/"},"instanceId":"e71cdec28a6223711480eba9f0c6654efef425b8a78d35fcfa45e4ee23ff6163","telemetry":{"enabled":false},"posthog":{"enabled":false,"apiHost":"https://ph.n8n.io","apiKey":"phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo","autocapture":false,"disableSessionRecording":true,"debug":false},"personalizationSurveyEnabled":false,"defaultLocale":"en","userManagement":{"quota":-1,"showSetupOnFirstLoad":false,"smtpSetup":false,"authenticationMethod":"email"},"sso":{"saml":{"loginEnabled":false,"loginLabel":""},"ldap":{"loginEnabled":false,"loginLabel":""},"oidc":{"loginEnabled":false,"loginUrl":"http://localhost:5678/rest/sso/oidc/login","callbackUrl":"http://localhost:5678/rest/sso/oidc/callback"}},"publicApi":{"enabled":true,"latestVersion":1,"path":"api","swaggerUi":{"enabled":true}},"workflowTagsDisabled":false,"logLevel":"info","hiringBannerEnabled":true,"aiAssistant":{"enabled":false},"templates":{"enabled":true,"host":"https://api.n8n.io/api/"},"executionMode":"regular","isMultiMain":false,"pushBackend":"websocket","communityNodesEnabled":true,"unverifiedCommunityNodesEnabled":true,"deployment":{"type":"default"},"allowedModules":{},"enterprise":{"sharing":false,"ldap":false,"saml":false,"oidc":false,"logStreaming":false,"advancedExecutionFilters":false,"variables":false,"sourceControl":false,"auditLogs":false,"externalSecrets":false,"showNonProdBanner":false,"debugInEditor":false,"binaryDataS3":false,"workflowHistory":false,"workerView":false,"advancedPermissions":false,"apiKeyScopes":false,"projects":{"team":{"limit":0}}},"mfa":{"enabled":true},"hideUsagePage":false,"license":{"consumerId":"unknown","environment":"production","planName":"Community"},"variables":{"limit":0},"banners":{"dismissed":["V1"]},"askAi":{"enabled":false},"aiCredits":{"enabled":false,"credits":0},"workflowHistory":{"pruneTime":-1,"licensePruneTime":-1},"pruning":{"isEnabled":true,"maxAge":336,"maxCount":10000},"security":{"blockFileAccessToN8nFiles":true},"easyAIWorkflowOnboarded":false,"partialExecution":{"version":2},"folders":{"enabled":false},"evaluation":{"quota":0},"activeModules":["insights"],"missingPackages":false}}
+============================================
+FINDING 3: Ollama v0.9.4 Unauthenticated API (CVSS 9.1)
+============================================
+
+--- Request: GET /api/tags ---
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Wed, 03 Jun 2026 13:34:47 GMT
+Content-Length: 319
+
+{"models":[{"name":"test-bypass:latest","model":"test-bypass:latest","modified_at":"2026-06-02T22:23:37.193032622Z","size":168,"digest":"31237ad1b7de05ad936ad781131696578d22d7274f66835424c21beabe866a51","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""}}]}
+--- Request: GET /api/version ---
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Wed, 03 Jun 2026 13:34:48 GMT
+Content-Length: 19
+
+{"version":"0.9.4"}
+============================================
+FINDING 4: Open WebUI 0.6.15 Config Disclosure + CORS (CVSS 8.6)
+============================================
+
+--- Request: GET /api/config ---
+HTTP/1.1 200 OK
+date: Wed, 03 Jun 2026 13:34:47 GMT
+server: uvicorn
+content-length: 265
+content-type: application/json
+x-process-time: 0
+
+{"status":true,"name":"Open WebUI","version":"0.6.15","default_locale":"","oauth":{"providers":{}},"features":{"auth":true,"auth_trusted_header":false,"enable_ldap":false,"enable_api_key":true,"enable_signup":false,"enable_login_form":true,"enable_websocket":true}}
+--- CORS Test: Origin reflection ---
+access-control-allow-origin: *
+access-control-allow-credentials: true
+
+============================================
+FINDING 5: ChromaDB via Kong (CVSS 5.3)
+============================================
+
+--- Request: GET /api/v1/heartbeat ---
+HTTP/1.1 401 Unauthorized
+Date: Wed, 03 Jun 2026 13:34:49 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+WWW-Authenticate: Basic realm="kong"
+Content-Length: 30
+Access-Control-Allow-Origin: *
+X-Kong-Response-Latency: 6
+Server: kong/2.8.1
+
+{
+  "message":"Unauthorized"
+}
+--- Request: GET /api/v1/collections ---
+HTTP/1.1 401 Unauthorized
+Date: Wed, 03 Jun 2026 13:34:50 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+WWW-Authenticate: Basic realm="kong"
+Content-Length: 30
+Access-Control-Allow-Origin: *
+X-Kong-Response-Latency: 16
+Server: kong/2.8.1
+
+{
+  "message":"Unauthorized"
+}
+============================================
+FINDING 6: Kong 2.8.1 CORS Wildcard (CVSS 5.3)
+============================================
+
+--- CORS Test on Kong ---
+Access-Control-Allow-Origin: *
+Server: kong/2.8.1
+

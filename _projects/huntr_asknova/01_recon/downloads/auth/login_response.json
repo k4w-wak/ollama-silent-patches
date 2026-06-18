@@ -1,0 +1,16 @@
+{
+  "message": "Login successful",
+  "user": {
+    "id": "cmq9tkatt0000mwj7vl35mfu8",
+    "email": "testuser99k4w@proton.me",
+    "name": "TestUser",
+    "username": "testuser99k4w",
+    "avatar": null,
+    "role": "user",
+    "status": "active",
+    "emailVerified": false
+  },
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbXE5dGthdHQwMDAwbXdqN3ZsMzVtZnU4IiwiZW1haWwiOiJ0ZXN0dXNlcjk5azR3QHByb3Rvbi5tZSIsInJvbGUiOiJ1c2VyIiwic2lkIjoiUkxUNDR3eVhvdjhvYzFrZVJ5UlFwOFZhMWVDMmhSTXAiLCJ2ZXIiOjAsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3ODEyMDIxNjEsImV4cCI6MTc4MTIwMzA2MX0.a7Xn2rMkEixHgYJU1YRJlRVl6QI_lgIPLIq6MVhKVns",
+  "tokenType": "Bearer",
+  "expiresIn": "15m"
+}

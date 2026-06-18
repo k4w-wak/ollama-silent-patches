@@ -1,0 +1,16 @@
+=== BUILDING TARGET LIST ===
+
+AI Infrastructure Targets:
+---
+Ollama: port 11434, 175K+ exposed
+vLLM: port 8000, /v1/models
+MLflow: port 5000, /ajax-api/2.0/mlflow
+n8n: port 5678, CVE-2026-21858 CVSS 10.0
+Langflow: CVE-2026-33017 RCE CVSS 9.8
+OpenClaw: port 18789
+ChromaDB: CVE-2026-45829 RCE CVSS 10.0
+Ray Dashboard: CVE-2023-6019 RCE
+Qdrant: port 6333, no auth
+Docker API: port 2375/2376
+Kubernetes: port 6443/10250
+Jupyter: port 8888

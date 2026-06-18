@@ -1,0 +1,16 @@
+# AI Service Detection Signatures for Bug Bounty/Security Research
+# ================================================================
+# Port 11434 - Ollama (175k+ exposed, CVE-2024-39720/21/22)
+# Port 8000  - vLLM / OpenAI-compatible APIs
+# Port 8080  - llama.cpp / LocalAI
+# Port 1234  - LM Studio
+# Port 4891  - GPT4All
+# Port 5001  - KoboldCpp
+# Port 7860  - Gradio / Stable Diffusion WebUI / ComfyUI
+# Port 8501  - Streamlit
+# Port 4000  - LiteLLM Proxy
+# Port 5000  - MLflow (CVE-2024-27132)
+# Port 18789 - OpenClaw/Clawdbot
+# Port 6333  - Qdrant vector DB
+# Port 19530 - Milvus vector DB
+# Port 3000  - Open WebUI / LobeChat / LibreChat

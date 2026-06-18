@@ -1,0 +1,141 @@
+[
+  {
+    "ip": "45.77.34.186",
+    "hostnames": [
+      "zproxy.lum-superproxy.io",
+      "45-77-34-186.lum-int.io"
+    ],
+    "all_ports": [
+      8443
+    ],
+    "ai_ports": [
+      8443
+    ],
+    "ai_cpes": [],
+    "vulns": []
+  },
+  {
+    "ip": "159.89.203.175",
+    "hostnames": [
+      "lavafoshi.online"
+    ],
+    "all_ports": [
+      22,
+      80,
+      4000,
+      5000
+    ],
+    "ai_ports": [
+      4000,
+      5000
+    ],
+    "ai_cpes": [],
+    "vulns": [
+      "CVE-2021-23017",
+      "CVE-2019-9513",
+      "CVE-2019-20372",
+      "CVE-2018-16845",
+      "CVE-2019-9516",
+      "CVE-2025-23419",
+      "CVE-2018-16844",
+      "CVE-2019-9511",
+      "CVE-2018-16843",
+      "CVE-2021-3618"
+    ]
+  },
+  {
+    "ip": "159.89.199.15",
+    "hostnames": [
+      "install-updating-connection.com",
+      "www.install-updating-connection.com"
+    ],
+    "all_ports": [
+      21,
+      22,
+      25,
+      53,
+      80,
+      110,
+      143,
+      443,
+      465,
+      500,
+      587,
+      993,
+      995,
+      3306,
+      8080,
+      8083,
+      8443
+    ],
+    "ai_ports": [
+      8443
+    ],
+    "ai_cpes": [],
+    "vulns": [
+      "CVE-2024-38477",
+      "CVE-2019-1552",
+      "CVE-2020-1971",
+      "CVE-2019-1551",
+      "CVE-2021-40438",
+      "CVE-2013-0941",
+      "CVE-2025-59775",
+      "CVE-2019-0211",
+      "CVE-2026-22795",
+      "CVE-2026-29169"
+    ]
+  },
+  {
+    "ip": "159.89.54.172",
+    "hostnames": [
+      "design.danconia.com"
+    ],
+    "all_ports": [
+      22,
+      8443
+    ],
+    "ai_ports": [
+      8443
+    ],
+    "ai_cpes": [],
+    "vulns": [
+      "CVE-2023-44487",
+      "CVE-2025-23419"
+    ]
+  },
+  {
+    "ip": "45.77.232.9",
+    "hostnames": [
+      "foti.3cx.com.au",
+      "45.77.232.9.vultrusercontent.com"
+    ],
+    "all_ports": [
+      5001
+    ],
+    "ai_ports": [
+      5001
+    ],
+    "ai_cpes": [],
+    "vulns": []
+  },
+  {
+    "ip": "135.181.62.15",
+    "hostnames": [
+      "static.15.62.181.135.clients.your-server.de",
+      "node.vortexservers.co.uk"
+    ],
+    "all_ports": [
+      80,
+      443,
+      447,
+      7000,
+      8443,
+      19132
+    ],
+    "ai_ports": [
+      8443
+    ],
+    "ai_cpes": [],
+    "vulns": []
+  }
+]

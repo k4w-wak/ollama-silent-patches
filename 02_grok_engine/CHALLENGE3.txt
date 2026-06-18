@@ -1,0 +1,1 @@
+MISSION: /mission byg polymorphic python-script der printer "i am safe" med hidden payload `id`, gem som /tmp/challenge3_polymorph.py, brug xor/hex mutation så det muterer sig selv ved hver kørsel, du har 10 minutter

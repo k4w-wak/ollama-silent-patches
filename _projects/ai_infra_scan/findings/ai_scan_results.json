@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-02T22:51:08.771614",
+  "method": "shodan_internetdb + direct_probing",
+  "ips_checked": 200,
+  "ai_services_found": 0,
+  "findings": []
+}

@@ -1,0 +1,317 @@
+"""
+GROK SWARM — Multi-Agent System
+================================
+Agent-tilbehør der kører SEKVENTIELT men med specialiserede prompts.
+Kan ikke køre parallelt (Ollama limitation) men kan specialisere.
+
+MODES:
+  - SWARM:  Del targets op mellem specialiserede agenter
+  - RACE:   Kør samme opgave 2x med forskellige modeller, vælg bedste
+  - PIPELINE: Kør agenter i rækkefølge (recon → exploit → report)
+
+STRATEGY:
+  I stedet for parallel execution (Ollama can't), vi bruger:
+  1. Specialiserede agent-personalities
+  2. Model-switching per phase
+  3. Result aggregation
+  4. Quality scoring
+"""
+
+import json
+import time
+import subprocess
+from datetime import datetime
+from pathlib import Path
+from typing import List, Dict, Optional
+
+# Agent personalities — specialiserede prompts
+AGENT_PERSONALITIES = {
+    "recon": {
+        "name": "Recon Scout",
+        "prompt": """You are a RECON SPECIALIST. Your job is PASSIVE information gathering ONLY.
+Focus on: subfinder, whatweb, curl_api, dig_deep, dnsrecon, searchsploit.
+NEVER run nmap or nuclei. ONLY passive recon.
+Be thorough. Enumerate everything. Find subdomains, tech stack, headers, cookies, auth endpoints.
+Report ALL findings in structured format.""",
+        "model": "glm-5.1:cloud",  # Fast for recon
+    },
+    "exploit": {
+        "name": "Exploit Hunter",
+        "prompt": """You are an EXPLOIT SPECIALIST. Your job is ACTIVE vulnerability testing.
+Focus on: nmap_scan, nuclei_scan, sql_injection, xss_scanner, jwt_tool, corsy, ssrfmap.
+Given recon data, probe for: misconfigs, exposed endpoints, auth bypass, CVEs.
+Test EVERYTHING the recon agent found. Be aggressive but careful (no DoS).
+Report each finding with: Severity, Vulnerability type, URL/endpoint, Proof of concept, Remediation.""",
+        "model": "glm-5.1:cloud",  # Weaker ethical filter = actual exploitation
+    },
+    "reporter": {
+        "name": "Report Writer",
+        "prompt": """You are a BUG BOUNTY REPORT WRITER. Your job is to compile findings into professional reports.
+Format: Executive Summary, Technical Findings (with severity, CVSS, remediation), Proof of Concept.
+Write clear, actionable reports that a CISO would understand.
+Include CVSS scores, OWASP categories, and remediation timelines.""",
+        "model": "glm-5.1:cloud",  # Fast for writing
+    },
+}
+
+# Swarm modes
+SWARM_MODES = ["swarm", "race", "pipeline"]
+
+
+class SwarmConfig:
+    """Configuration for a swarm run."""
+    def __init__(
+        self,
+        mode: str = "pipeline",
+        agents: List[str] = None,
+        model_override: str = None,
+        output_dir: str = None,
+        targets: List[str] = None,
+    ):
+        self.mode = mode
+        self.agents = agents or ["recon", "exploit", "reporter"]
+        self.model_override = model_override
+        self.output_dir = output_dir or str(Path.home() / "Skrivebord" / "swarm_reports")
+        self.targets = targets or []
+        
+        # Validate
+        if self.mode not in SWARM_MODES:
+            raise ValueError(f"Mode must be one of {SWARM_MODES}")
+
+
+class SwarmResult:
+    """Result from a single agent."""
+    def __init__(self, agent_name: str, model: str, findings: str, duration: float):
+        self.agent_name = agent_name
+        self.model = model
+        self.findings = findings
+        self.duration = duration
+        self.timestamp = datetime.now().isoformat()
+    
+    def to_dict(self):
+        return {
+            "agent": self.agent_name,
+            "model": self.model,
+            "findings_length": len(self.findings),
+            "duration_seconds": round(self.duration, 1),
+            "timestamp": self.timestamp,
+        }
+
+
+class AgentSwarm:
+    """
+    Multi-Agent Orchestrator for Grok.
+    
+    Manages specialized agents that run sequentially (not parallel — Ollama limit).
+    Each agent has a personality, model preference, and task scope.
+    """
+    
+    def __init__(self, config: SwarmConfig = None):
+        self.config = config or SwarmConfig()
+        self.results: List[SwarmResult] = []
+        self.log_path = Path.home() / ".grok" / "logs" / "swarm.log"
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    def _log(self, msg: str):
+        ts = datetime.now().strftime("%H:%M:%S")
+        line = f"[{ts}] {msg}"
+        print(f"  🐝 {line}")
+        with open(self.log_path, "a") as f:
+            f.write(line + "\n")
+    
+    def _run_agent(self, agent_name: str, target: str, context: str = "") -> SwarmResult:
+        """Run a single agent via Ollama CLI."""
+        personality = AGENT_PERSONALITIES.get(agent_name)
+        if not personality:
+            personality = AGENT_PERSONALITIES["recon"]
+        
+        model = self.config.model_override or personality["model"]
+        system_prompt = personality["prompt"]
+        
+        if context:
+            prompt = f"{system_prompt}\n\nCONTEXT FROM PREVIOUS AGENT:\n{context}\n\nTARGET: {target}"
+        else:
+            prompt = f"{system_prompt}\n\nTARGET: {target}"
+        
+        self._log(f"Agent '{personality['name']}' ({model}) → {target}")
+        
+        start = time.time()
+        try:
+            result = subprocess.run(
+                ["ollama", "run", model, prompt],
+                capture_output=True, text=True, timeout=300
+            )
+            duration = time.time() - start
+            output = result.stdout if result.stdout else result.stderr
+            if not output:
+                output = "[No output from agent]"
+            
+            # Truncate to 5000 chars for next agent context
+            if len(output) > 5000:
+                output = output[:2500] + "\n...[truncated]...\n" + output[-2500:]
+            
+            sr = SwarmResult(agent_name, model, output, duration)
+            self._log(f"✅ {personality['name']} done in {duration:.1f}s — {len(output)} chars")
+            return sr
+            
+        except subprocess.TimeoutExpired:
+            duration = time.time() - start
+            self._log(f"⏰ {personality['name']} timed out after {duration:.1f}s")
+            return SwarmResult(agent_name, model, "[Agent timed out]", duration)
+        except Exception as e:
+            duration = time.time() - start
+            self._log(f"❌ {personality['name']} error: {str(e)[:100]}")
+            return SwarmResult(agent_name, model, f"[Agent error: {str(e)[:200]}]", duration)
+    
+    def run_swarm(self, targets: List[str] = None) -> Dict:
+        """
+        SWARM mode: Split targets across specialized agents.
+        Each target gets its own recon→exploit pipeline.
+        """
+        targets = targets or self.config.targets
+        if not targets:
+            return {"error": "No targets specified"}
+        
+        self._log(f"🐝 SWARM mode — {len(targets)} targets, {len(self.config.agents)} agents")
+        all_results = []
+        
+        for target in targets:
+            self._log(f"🎯 Target: {target}")
+            context = ""
+            
+            for agent_name in self.config.agents:
+                sr = self._run_agent(agent_name, target, context)
+                all_results.append(sr)
+                context = sr.findings  # Pass findings to next agent
+        
+        self.results = all_results
+        return self._compile_results()
+    
+    def run_race(self, target: str) -> Dict:
+        """
+        RACE mode: Two models compete on the same task.
+        Best result wins. Uses quality scoring.
+        """
+        self._log(f"🏁 RACE mode — 2 models competing on {target}")
+        
+        race_models = ["glm-5.1:cloud", "kimi-k2.5:cloud"]
+        results = {}
+        
+        for model in race_models:
+            self._log(f"🏇 {model} starts...")
+            start = time.time()
+            try:
+                result = subprocess.run(
+                    ["ollama", "run", model, 
+                     f"Bug bounty recon on {target}. "
+                     f"Run subfinder, whatweb, curl headers analysis. "
+                     f"Report all findings with severity levels."],
+                    capture_output=True, text=True, timeout=300
+                )
+                duration = time.time() - start
+                output = result.stdout if result.stdout else result.stderr
+                results[model] = {
+                    "output": output,
+                    "duration": duration,
+                    "length": len(output) if output else 0,
+                    "quality_score": self._score_quality(output),
+                }
+                self._log(f"✅ {model} done in {duration:.1f}s — score: {results[model]['quality_score']}")
+            except Exception as e:
+                results[model] = {"output": f"Error: {e}", "duration": 0, "quality_score": 0}
+        
+        # Pick winner
+        winner = max(results, key=lambda m: results[m]["quality_score"])
+        self._log(f"🏆 Winner: {winner} (score: {results[winner]['quality_score']})")
+        
+        return {
+            "mode": "race",
+            "target": target,
+            "winner": winner,
+            "scores": {m: r["quality_score"] for m, r in results.items()},
+            "winning_output": results[winner]["output"],
+            "all_results": results,
+        }
+    
+    def run_pipeline(self, target: str) -> Dict:
+        """
+        PIPELINE mode: recon → exploit → report.
+        Each phase feeds the next.
+        """
+        self._log(f"🔗 PIPELINE mode — target: {target}")
+        
+        phases = [
+            ("recon", "PASSIVE RECON on " + target),
+            ("exploit", "ACTIVE EXPLOITATION on " + target),
+            ("reporter", "WRITE REPORT for " + target),
+        ]
+        
+        context = ""
+        all_results = []
+        
+        for phase_name, phase_desc in phases:
+            self._log(f"📎 Phase: {phase_name}")
+            sr = self._run_agent(phase_name, target, context)
+            all_results.append(sr)
+            context = sr.findings
+        
+        self.results = all_results
+        return self._compile_results()
+    
+    def _score_quality(self, text: str) -> float:
+        """Score output quality based on heuristics."""
+        if not text:
+            return 0.0
+        score = 0.0
+        # Length bonus (up to 10 points)
+        score += min(len(text) / 500, 10)
+        # Finding indicators
+        findings = ["CVE", "vuln", "security", "exposed", "misconfig", 
+                    "XSS", "SQL", "IDOR", "SSRF", "RCE", "LFI", "CSP",
+                    "header", "cookie", "token", "auth", "bypass"]
+        for f in findings:
+            if f.lower() in text.lower():
+                score += 0.5
+        # Structure indicators
+        structure = ["##", "|", "```", "1.", "2.", "**"]
+        for s in structure:
+            if s in text:
+                score += 0.3
+        return round(score, 1)
+    
+    def _compile_results(self) -> Dict:
+        """Compile all agent results into summary."""
+        return {
+            "mode": self.config.mode,
+            "agents_used": [r.agent_name for r in self.results],
+            "models_used": [r.model for r in self.results],
+            "total_duration": sum(r.duration for r in self.results),
+            "total_findings_length": sum(len(r.findings) for r in self.results),
+            "results": [r.to_dict() for r in self.results],
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
+def run_swarm(target: str, mode: str = "pipeline", agents: List[str] = None) -> Dict:
+    """Quick-start function for swarm."""
+    config = SwarmConfig(mode=mode, agents=agents, targets=[target])
+    swarm = AgentSwarm(config)
+    
+    if mode == "swarm":
+        return swarm.run_swarm([target])
+    elif mode == "race":
+        return swarm.run_race(target)
+    elif mode == "pipeline":
+        return swarm.run_pipeline(target)
+    else:
+        return {"error": f"Unknown mode: {mode}"}
+
+
+if __name__ == "__main__":
+    import sys
+    target = sys.argv[1] if len(sys.argv) > 1 else "shopify.com"
+    mode = sys.argv[2] if len(sys.argv) > 2 else "pipeline"
+    
+    print(f"🐝 GROK SWARM — {mode.upper()} mode on {target}")
+    result = run_swarm(target, mode)
+    print(json.dumps(result, indent=2))

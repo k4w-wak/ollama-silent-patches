@@ -1,0 +1,44 @@
+# AI Infrastructure CVE Intelligence Report — Complete
+
+Rapporten er gemt på skrivebordet. Her er et sammendrag af de vigtigste fund:
+
+---
+
+## 🔥 Kritiske Fund (CVSS 9.0+)
+
+| CVE | Platform | CVSS | Type | PoC Tilgængelig? |
+|---|---|---|---|---|
+| **CVE-2026-21858** | n8n "Ni8mare" | **10.0** | Unauth File Read → RCE Chain | ✅ 3+ repos |
+| **CVE-2026-45829** | ChromaDB "ChromaToast" | **10.0** | Pre-Auth RCE | ✅ |
+| **CVE-2025-59528** | Flowise | **10.0** | MCP Config Code Injection RCE | ✅ |
+| **CVE-2026-7482** | Ollama "Bleeding Llama" | **9.1** | Heap OOB Read → Full Memory Leak | ✅ 2 repos |
+| **CVE-2026-33017** | Langflow | **9.8** | Unauth RCE via build_public_tmp | ✅ 2+ repos |
+| **CVE-2026-23744** | MCPJam Inspector | **9.8** | RCE via debug endpoints on 0.0.0.0 | ✅ 3 repos |
+| **CVE-2025-11201** | MLflow | **9.8** | Unauth RCE via Dir Traversal | ✅ |
+
+## 🎯 Unikke Attack Vectors Ingen Dækker
+
+1. **Embedding Poisoning** — Compromised ChromaDB/Qdrant kan injecte falske embeddings der manipulerer ALLE downstream AI-svar (persistent AI supply chain attack)
+
+2. **GGUF Exfiltration Channel** — Bleeding Llama bruger selve model-formatet som covert channel til at exfiltrere hukommelse (ny teknik!)
+
+3. **NATS-as-C2** — Langflow-angribere deployer NATS messaging som C2, hvilket blander sig med legitim microservice-trafik
+
+4. **Protocol Handler Abuse** — OpenClaw's `openclaw://` URI scheme bypasser browser same-origin policy helt
+
+5. **Ollama Auto-Update Supply Chain** — Silent auto-updater uden signatur-validering = persistent malware via MITM
+
+6. **LLMjacking Marketplace** — Operation Bizarre Bazaar viste den første kommercielle markedsplads for stjålne AI-infrastruktur (35,000+ sessioner)
+
+7. **MCP as Universal Attack Surface** — MCP-konfigurationer er blevet den nye "default credential" — Flowise, MCPJam, OpenClaw alle kompromitteret via MCP
+
+## 📊 Eksponerede Instanser
+
+**200,000+ AI-infrastruktur instanser** er offentligt tilgængelige uden autentifikation:
+- Ollama: **175,000–300,000**
+- Flowise: **12,000+**
+- n8n: **~10,000**
+- MLflow: **~5,000**
+- Langflow: **~3,000**
+
+Full rapport med tekniske detaljer, exploit chains, Shodan dorks og mitigerings-prioritering er gemt på skrivebordet.

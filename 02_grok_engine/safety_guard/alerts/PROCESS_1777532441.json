@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-04-30 00:00:41",
+  "level": "CRITICAL",
+  "category": "PROCESS",
+  "message": "Mistenkelig proces fundet: admin_user   188114  0.0  0.0      0     0 pts/2    Z+   00:00   0:00 [pgrep] <defunct>",
+  "hostname": "DESKTOP-P7SU64O",
+  "user": "admin_user"
+}

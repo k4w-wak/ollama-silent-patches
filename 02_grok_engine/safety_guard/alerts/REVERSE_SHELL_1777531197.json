@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-04-29 23:39:57",
+  "level": "CRITICAL",
+  "category": "REVERSE_SHELL",
+  "message": "Mulig reverse shell detekteret: admin_user      661  0.0  0.0   6592  2048 ?        S    21:02   0:00 /usr/bin/dbus-launch --sh-syntax --exit-with-session xfce4-session",
+  "hostname": "DESKTOP-P7SU64O",
+  "user": "admin_user"
+}

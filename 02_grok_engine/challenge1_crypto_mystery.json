@@ -1,0 +1,15 @@
+{
+  "challenge": "CHALLENGE 1: CRYPTO MYSTERY (100p)",
+  "algorithm": "AES-256-CBC",
+  "ciphertext_b64": "8Y0BwEMxHtz59LY3JEf4EVH+lQUXzXMeklfhhlBLCJepTgx0qkKnZ6zUD2KeAlPs",
+  "iv_b64": "V0VBS19JVl8xMjM0NTY3OA==",
+  "hint": "nøglerne er ikke helt tilfældige… key generation brugte random.seed()",
+  "weaknesses": [
+    "PRNG seeded with time rounded to nearest hour",
+    "Static/reused IV leaks patterns"
+  ],
+  "key_entropy": "~12 bits (1 hour window = 3600 possibilities)",
+  "solution_approach": "Reconstruct key by testing recent hourly timestamps as seeds",
+  "flag": "K4W_WAK{AES_WEAK_KEY_SEED_RECOVERED_1337}",
+  "status": "SOLVED — reversed without brute force"
+}

@@ -1,0 +1,620 @@
+#!/usr/bin/env python3
+"""
+ ██████  ███████ ██████  ███████ ██████  
+██    ██ ██      ██   ██ ██      ██   ██ 
+██ ╗  ██ █████   ██████  █████   ██████  
+██ ╔╔██ ██      ██      ██      ██   ██ 
+ ╚█████  ███████ ██      ███████ ██████  
+
+Den ultimative Grok — UBEGRÆNSET. UNSCOPED. UNSANDBOXED.
+Bygget af admin_user.
+"""
+
+import sys
+import os
+import time
+import signal
+from datetime import datetime
+
+# Add project to path
+_GROK_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _GROK_DIR)
+sys.path.insert(0, os.path.join(_GROK_DIR, 'core'))
+
+os.chdir(_GROK_DIR)
+
+from core.agent import GrokAgent, Colors
+from core.models import ModelRouter
+from core.memory import MemoryManager
+from core.tools import list_tools, tool_count, TOOLS
+try:
+    from core.config import SYSTEM_PROMPT, MEMORY_AUTO_SAVE, STREAMING_ENABLED
+except ImportError:
+    from config import SYSTEM_PROMPT, MEMORY_AUTO_SAVE, STREAMING_ENABLED
+
+
+def print_banner(agent: GrokAgent):
+    """Print boot banner"""
+    provider = agent.router.active_provider or "?"
+    model = agent.router.active_model or "?"
+    
+    # Feature flags
+    rag_status = f"{Colors.GREEN}✓{Colors.CYAN}" if agent.rag else f"{Colors.RED}✗{Colors.CYAN}"
+    struct_status = f"{Colors.GREEN}✓{Colors.CYAN}" if agent.structured else f"{Colors.RED}✗{Colors.CYAN}"
+    vision_status = f"{Colors.GREEN}✓{Colors.CYAN}" if agent.vision else f"{Colors.RED}✗{Colors.CYAN}"
+    
+    print(f"""
+{Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
+║{Colors.BOLD}  GROK — UBEGRÆNSET AGENT{Colors.END}{Colors.CYAN}                                  ║
+║  ══════════════════════════════════════════════════════════   ║
+║                                                               ║
+║  {Colors.GREEN}✓{Colors.CYAN} UNSCOPED   — Fuld systemadgang                      {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} UNSANDBOXED — Ingen begrænsninger                  {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} {tool_count()} Tools — Fil, system, web, security, MCP, task        {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} Multi-Model — GROQ cloud + Ollama lokal             {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} Persistent Memory — Husker alt                      {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} Auto-Save — Ingen tab                              {Colors.END}{Colors.CYAN}║
+║  {Colors.GREEN}✓{Colors.CYAN} ReAct Reasoning — Tænk, hand, observer              {Colors.END}{Colors.CYAN}║
+║  {rag_status} RAG Knowledge — Semantisk søgning i tidligere fund       {Colors.END}{Colors.CYAN}║
+║  {struct_status} Structured Output — JSON skema for Findings            {Colors.END}{Colors.CYAN}║
+║  {vision_status} Vision Analysis — Screenshot & billede analyse         {Colors.END}{Colors.CYAN}║
+║                                                               ║
+║  Model: {Colors.BOLD}{provider}/{model}{Colors.END}
+║  GPU: RTX 5050 Max-Q (8GB)                                ║
+╚═══════════════════════════════════════════════════════════════╝{Colors.END}
+""")
+
+
+def print_model_status(router: ModelRouter):
+    """Vis model status"""
+    print(f"{Colors.DIM}[Models]{Colors.END}")
+    print(router.get_status_report())
+    print()
+
+
+def print_commands():
+    """Vis tilgængelige kommandoer"""
+    print(f"""{Colors.BOLD}KOMMANDOER{Colors.END}
+  {Colors.CYAN}/help{Colors.END}          Vis hjælp
+  {Colors.CYAN}/tools{Colors.END}         Vis værktøjer
+  {Colors.CYAN}/memory{Colors.END}        Vis hukommelse
+  {Colors.CYAN}/model{Colors.END}         Vis/skift model
+  {Colors.CYAN}/status{Colors.END}       Agent status
+  {Colors.CYAN}/save{Colors.END}         Gem session nu
+  {Colors.CYAN}/clear{Colors.END}        Ryd samtale
+  {Colors.CYAN}/quit{Colors.END}         Afslut
+  {Colors.MAGENTA}/task{Colors.END}     Opret/list/opdater tasks
+  {Colors.MAGENTA}/todo{Colors.END}      Vis/skriv todos
+  {Colors.MAGENTA}/session{Colors.END}   Gem/load/list sessions
+  {Colors.MAGENTA}/mcp{Colors.END}       MCP servere
+  {Colors.MAGENTA}/cost{Colors.END}      Token brugsrapport
+  {Colors.MAGENTA}/plan{Colors.END}      Start plan-mode
+  {Colors.MAGENTA}/history{Colors.END}    Samtalehistorik
+  {Colors.CYAN}/config{Colors.END}      Læs/skriv settings
+  {Colors.MAGENTA}/agent{Colors.END}     Sub-agents (spawn/run/status/stop)
+  {Colors.MAGENTA}/hooks{Colors.END}     Hooks (list/add/remove)
+  {Colors.MAGENTA}/plugin{Colors.END}    Plugins (list/add/run/remove)
+  {Colors.MAGENTA}/cron{Colors.END}      Cron jobs (list/add/remove/run)
+  {Colors.MAGENTA}/git{Colors.END}       Git (init/status/diff/add/commit/push/pull/log/branch)
+  {Colors.MAGENTA}/ssh{Colors.END}       SSH remote (run/copy/tunnel/hosts/grok_server)
+  {Colors.MAGENTA}/repl{Colors.END}      Persistent Python REPL (exec/vars/history/reset/save/load)
+  {Colors.YELLOW}/rag{Colors.END}        RAG knowledge base (add/search/stats/index/clear)
+  {Colors.YELLOW}/structured{Colors.END} Structured output (finding/recon/from_text)
+  {Colors.YELLOW}/vision{Colors.END}     Vision (analyze/screenshot/scan/ocr/models)
+""")
+
+
+def handle_command(agent: GrokAgent, user_input: str) -> bool:
+    """Håndtér /kommandoer. Return True = behold samtalen, False = afslut"""
+    
+    cmd = user_input.lower().strip()
+    
+    if cmd in ('/quit', '/exit', '/q', 'exit', 'quit'):
+        # Gem før afslut
+        agent.memory.save_session()
+        print(f"\n{Colors.CYAN}Farvel! Alt er gemt. Vi ses! 🤖💚{Colors.END}\n")
+        return False
+    
+    if cmd in ('/help', '/h'):
+        print_commands()
+        return True
+    
+    if cmd == '/tools':
+        print(list_tools())
+        return True
+    
+    if cmd == '/memory':
+        print(f"\n{Colors.BOLD}LANGTIDSHUKOMMELSE{Colors.END}")
+        facts = agent.memory.long_term.get_all_facts()
+        if facts:
+            for key, value in facts.items():
+                print(f"  {Colors.GREEN}•{Colors.END} {key}: {value}")
+        else:
+            print("  (tom)")
+        print(f"\n{Colors.BOLD}KORTTIDSHUKOMMELSE{Colors.END}")
+        print(f"  {agent.memory.short_term.count()} beskeder")
+        print(f"  Auto-save: {'✅' if MEMORY_AUTO_SAVE else '❌'}")
+        return True
+    
+    if cmd == '/model':
+        print(f"\n{Colors.BOLD}AKTIV MODEL{Colors.END}")
+        print(f"  Provider: {agent.router.active_provider}")
+        print(f"  Model: {agent.router.active_model}")
+        print()
+        print_model_status(agent.router)
+        return True
+    
+    if cmd.startswith('/model '):
+        parts = user_input.split(' ', 2)
+        if len(parts) >= 3:
+            provider = parts[1].strip()
+            model = parts[2].strip()
+            agent.switch_model(provider, model)
+            print(f"{Colors.GREEN}✅{Colors.END} Skiftet til {provider}/{model}")
+        else:
+            print(f"{Colors.YELLOW}Format: /model <provider> <model>{Colors.END}")
+            print(f"Eksempel: /model groq llama-3.3-70b-versatile")
+            print(f"Eksempel: /model ollama llama3.1:8b")
+        return True
+    
+    if cmd == '/status':
+        status = agent.get_status()
+        print(f"\n{Colors.BOLD}GROK STATUS{Colors.END}")
+        for key, value in status.items():
+            if isinstance(value, dict):
+                print(f"  {key}:")
+                for k, v in value.items():
+                    print(f"    {k}: {v}")
+            else:
+                print(f"  {key}: {value}")
+        return True
+    
+    if cmd == '/save':
+        path = agent.memory.save_session()
+        print(f"{Colors.GREEN}✅{Colors.END} Session gemt: {path}")
+        return True
+    
+    if cmd == '/clear':
+        agent.memory.clear_conversation()
+        agent._init_system_prompt()
+        print(f"{Colors.GREEN}✅{Colors.END} Samtale ryddet (langtidshukommelse bevaret)")
+        return True
+    
+    # New commands from claw-code port
+    if cmd.startswith('/task'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 2)
+        if len(parts) == 1 or parts[1] == 'list':
+            print(execute_tool('task_list', ''))
+        elif parts[1] == 'create' and len(parts) >= 3:
+            print(execute_tool('task_create', parts[2]))
+        elif parts[1] == 'stop' and len(parts) >= 3:
+            print(execute_tool('task_stop', parts[2]))
+        else:
+            print(f"Brug: /task [list|create <title>|stop <id>|update <id> <status>]")
+        return True
+    
+    if cmd.startswith('/todo'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 1)
+        if len(parts) == 1 or parts[1].strip() == 'list' or parts[1].strip() == 'read':
+            print(execute_tool('todo_read', ''))
+        else:
+            print(execute_tool('todo_write', parts[1]))
+        return True
+    
+    if cmd.startswith('/session'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 2)
+        if len(parts) == 1 or parts[1] == 'list':
+            print(execute_tool('session_list', ''))
+        elif parts[1] == 'save':
+            sid = parts[2] if len(parts) >= 3 else ""
+            print(execute_tool('session_save', sid))
+        elif parts[1] == 'load' and len(parts) >= 3:
+            print(execute_tool('session_load', parts[2]))
+        else:
+            print(f"Brug: /session [list|save [id]|load <id>]")
+        return True
+    
+    if cmd.startswith('/mcp'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 1)
+        if len(parts) == 1 or parts[1].strip() == 'list':
+            print(execute_tool('mcp_list', ''))
+        elif parts[1].strip().startswith('add '):
+            print(execute_tool('mcp_add', parts[1][4:]))
+        else:
+            print(f"Brug: /mcp [list|add <name> <type> <command>]")
+        return True
+    
+    if cmd.startswith('/cost'):
+        from core.tools import execute_tool
+        print(execute_tool('cost_report', ''))
+        return True
+    
+    if cmd.startswith('/history'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 1)
+        limit = parts[1] if len(parts) > 1 else '50'
+        print(execute_tool('history_read', limit))
+        return True
+    
+    if cmd.startswith('/plan'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 1)
+        problem = parts[1] if len(parts) > 1 else ""
+        print(execute_tool('plan', problem if problem else "Beskriv problemet"))
+        return True
+    
+    if cmd.startswith('/config'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 2)
+        if len(parts) == 1:
+            from core.config import list_settings
+            print(list_settings())
+        elif len(parts) == 2:
+            print(execute_tool('config_read', parts[1]))
+        elif len(parts) >= 3:
+            print(execute_tool('config_write', f"{parts[1]} {parts[2]}"))
+        return True
+    
+    if cmd.startswith('/agent'):
+        from core.tools import execute_tool
+        parts = user_input.strip().split(None, 2)
+        if len(parts) == 1 or parts[1] == 'list' or parts[1] == 'status':
+            print(execute_tool('agent_status', ''))
+        elif parts[1] == 'spawn' and len(parts) >= 4:
+            print(execute_tool('agent_spawn', f'{parts[2]} {parts[1]} | {" ".join(parts[3:])}' if len(parts) > 3 else f'general {parts[2]} | {parts[2]}'))
+        elif parts[1] == 'spawn':
+            name = ' '.join(parts[2:]) if len(parts) > 2 else 'explore Scan system | Analyze the system'
+            print(execute_tool('agent_spawn', name))
+        elif parts[1] == 'run' and len(parts) >= 3:
+            print(execute_tool('agent_run', parts[2]))
+        elif parts[1] == 'stop' and len(parts) >= 3:
+            print(execute_tool('agent_stop', parts[2]))
+        else:
+            print(f'Brug: /agent [list|spawn [type] [desc]|run [id]|stop [id]]')
+        return True
+    
+    # Hooks
+    if cmd.startswith('/hooks'):
+        parts = cmd.split()
+        if len(parts) == 1 or parts[1] == 'list':
+            print(execute_tool('hooks_list', ''))
+        elif parts[1] == 'add' and len(parts) >= 4:
+            print(execute_tool('hooks_add', ' '.join(parts[2:])))
+        elif parts[1] == 'remove' and len(parts) >= 3:
+            print(execute_tool('hooks_remove', parts[2]))
+        else:
+            print(f'Brug: /hooks [list|add pre_tool|post_tool tool command|remove id]')
+        return True
+    
+    # Plugins
+    if cmd.startswith('/plugin'):
+        parts = cmd.split()
+        if len(parts) == 1 or parts[1] == 'list':
+            print(execute_tool('plugin_list', ''))
+        elif parts[1] == 'add' and len(parts) >= 4:
+            print(execute_tool('plugin_add', ' '.join(parts[2:])))
+        elif parts[1] == 'run' and len(parts) >= 3:
+            print(execute_tool('plugin_run', ' '.join(parts[2:])))
+        elif parts[1] == 'remove' and len(parts) >= 3:
+            print(execute_tool('plugin_remove', parts[2]))
+        else:
+            print(f'Brug: /plugin [list|add name command|run name [input]|remove name]')
+        return True
+    
+    # Cron
+    if cmd.startswith('/cron'):
+        parts = cmd.split()
+        if len(parts) == 1 or parts[1] == 'list':
+            print(execute_tool('cron_list', ''))
+        elif parts[1] == 'add' and len(parts) >= 4:
+            print(execute_tool('cron_add', ' '.join(parts[2:])))
+        elif parts[1] == 'remove' and len(parts) >= 3:
+            print(execute_tool('cron_remove', parts[2]))
+        elif parts[1] == 'run' and len(parts) >= 3:
+            print(execute_tool('cron_run', parts[2]))
+        else:
+            print(f'Brug: /cron [list|add interval command|remove id|run id]')
+        return True
+    
+    # Git
+    if cmd.startswith('/git'):
+        parts = cmd.split(maxsplit=2)
+        sub = parts[1] if len(parts) > 1 else ''
+        path = parts[2] if len(parts) > 2 else ''
+        if sub in ('', 'status'):
+            print(execute_tool('git_status', path))
+        elif sub == 'init':
+            print(execute_tool('git_init', path))
+        elif sub == 'diff':
+            print(execute_tool('git_diff', path))
+        elif sub == 'add':
+            print(execute_tool('git_add', path))
+        elif sub == 'commit':
+            msg = ' '.join(parts[2:]) if len(parts) > 2 else 'Auto-commit'
+            print(execute_tool('git_commit', msg))
+        elif sub == 'push':
+            print(execute_tool('git_push', path))
+        elif sub == 'pull':
+            print(execute_tool('git_pull', path))
+        elif sub == 'log':
+            print(execute_tool('git_log', path))
+        elif sub == 'branch':
+            print(execute_tool('git_branch', path))
+        else:
+            print(f'Brug: /git [status|init|diff|add|commit msg|push|pull|log|branch]')
+        return True
+    
+    # SSH Remote
+    if cmd.startswith('/ssh'):
+        parts = cmd.split(maxsplit=2)
+        sub = parts[1] if len(parts) > 1 else ''
+        if sub in ('', 'hosts'):
+            print(execute_tool('ssh_hosts', ''))
+        elif sub == 'run' and len(parts) > 2:
+            print(execute_tool('ssh_run', parts[2]))
+        elif sub == 'copy' and len(parts) > 2:
+            print(execute_tool('ssh_copy', parts[2]))
+        elif sub == 'tunnel' and len(parts) > 2:
+            print(execute_tool('ssh_tunnel', parts[2]))
+        elif sub == 'add' and len(parts) > 2:
+            print(execute_tool('ssh_add_host', parts[2]))
+        elif sub == 'server':
+            print(execute_tool('grok_server', parts[2] if len(parts) > 2 else ''))
+        elif sub == 'enable':
+            print(execute_tool('enable_ssh', ''))
+        else:
+            print(f'Brug: /ssh [run|copy|tunnel|hosts|add|server|enable]')
+        return True
+    
+    # REPL
+    if cmd.startswith('/repl'):
+        parts = cmd.split(maxsplit=2)
+        sub = parts[1] if len(parts) > 1 else ''
+        if sub in ('', 'vars'):
+            print(execute_tool('repl_vars', ''))
+        elif sub == 'hist':
+            print(execute_tool('repl_history', ''))
+        elif sub == 'reset':
+            print(execute_tool('repl_reset', ''))
+        elif sub == 'save' and len(parts) > 2:
+            print(execute_tool('repl_save', parts[2]))
+        elif sub == 'load' and len(parts) > 2:
+            print(execute_tool('repl_load', parts[2]))
+        elif len(parts) > 1 and sub not in ('vars','hist','reset','save','load'):
+            # Direct exec: /repl <code>
+            code = cmd[len('/repl '):]
+            print(execute_tool('repl', code))
+        else:
+            print(f'Brug: /repl [code|vars|hist|reset|save file|load file]')
+        return True
+    
+    # ── RAG Knowledge Base ──
+    if cmd.startswith('/rag'):
+        if not agent.rag:
+            print(f"{Colors.RED}[RAG] Ikke tilgængeligt — importer core.rag fejlede{Colors.END}")
+            return True
+        parts = cmd.split(maxsplit=1)
+        sub = parts[1] if len(parts) > 1 else ""
+        if not sub or sub == "stats":
+            stats = agent.rag.get_stats()
+            print(f"\n{Colors.CYAN}╭─ RAG Knowledge Base ──────────────{Colors.END}")
+            print(f"{Colors.CYAN}│{Colors.END} Total chunks: {stats['total_chunks']}")
+            print(f"{Colors.CYAN}│{Colors.END} Embeddings:   {stats['total_embeddings']}")
+            print(f"{Colors.CYAN}│{Colors.END} Targets:      {stats['unique_targets']}")
+            print(f"{Colors.CYAN}│{Colors.END} Sources:      {stats['sources']}")
+            print(f"{Colors.CYAN}╰─────────────────────────────────────{Colors.END}")
+        elif sub.startswith("add "):
+            print(execute_tool('rag_add', sub[4:]))
+        elif sub.startswith("search "):
+            print(execute_tool('rag_search', sub[7:]))
+        elif sub.startswith("similar "):
+            print(execute_tool('rag_find_similar', sub[8:]))
+        elif sub.startswith("index"):
+            print(execute_tool('rag_index', ''))
+        elif sub.startswith("clear"):
+            print(execute_tool('rag_clear', sub[6:] if len(sub) > 6 else 'all'))
+        else:
+            print(f"Brug: /rag [stats|add <text>|search <query>|similar <target>|index|clear]")
+        return True
+    
+    # ── Structured Output ──
+    if cmd.startswith('/structured'):
+        if not agent.structured:
+            print(f"{Colors.RED}[STRUCTURED] Ikke tilgængeligt — importer core.structured fejlede{Colors.END}")
+            return True
+        parts = cmd.split(maxsplit=1)
+        sub = parts[1] if len(parts) > 1 else ""
+        if sub.startswith("finding "):
+            print(execute_tool('structured_finding', sub[8:]))
+        elif sub.startswith("recon "):
+            print(execute_tool('structured_recon', sub[6:]))
+        elif sub.startswith("from "):
+            print(execute_tool('structured_from_text', sub[5:]))
+        elif sub.startswith('"') or sub.startswith("'") or sub.startswith('{'):
+            # Direct evidence: /structured "raw evidence text"
+            print(execute_tool('structured_finding', sub))
+        else:
+            print(f"Brug: /structured [finding <evidence>|recon <json>|from <text>]")
+            print(f"  finding — Generer struktureret Finding fra evidence")
+            print(f"  recon   — Generer struktureret recon rapport")
+            print(f"  from    — Parse ustruktureret tekst til Finding format")
+        return True
+    
+    # ── Vision Analysis ──
+    if cmd.startswith('/vision'):
+        if not agent.vision:
+            print(f"{Colors.RED}[VISION] Ikke tilgængeligt — importer core.vision fejlede{Colors.END}")
+            return True
+        parts = cmd.split(maxsplit=1)
+        sub = parts[1] if len(parts) > 1 else ""
+        if sub.startswith("analyze "):
+            print(execute_tool('vision_analyze', sub[8:]))
+        elif sub.startswith("screenshot "):
+            print(execute_tool('vision_screenshot', sub[11:]))
+        elif sub.startswith("scan "):
+            print(execute_tool('vision_scan', sub[5:]))
+        elif sub.startswith("ocr "):
+            print(execute_tool('vision_ocr', sub[4:]))
+        elif sub == "models":
+            print(execute_tool('vision_models', ''))
+        else:
+            print(f"Brug: /vision [analyze <path>|screenshot <path>|scan <path> [type]|ocr <path>|models]")
+            print(f"  analyze    — Analysér billede (preset: general)")
+            print(f"  screenshot — Analysér web screenshot for security issues")
+            print(f"  scan       — Analysér scan-result (Nmap, Kismet)")
+            print(f"  ocr        — Extract tekst fra billede")
+            print(f"  models     — Vis tilgængelige vision models")
+        return True
+    
+    # Ikke en kommando
+    return None
+
+
+
+def print_daily_update():
+    """Vis dagens opdatering fra GROK-DAILY-LOG.md"""
+    from pathlib import Path
+    daily_file = Path(__file__).parent / "GROK-DAILY-LOG.md"
+    if not daily_file.exists():
+        return
+    
+    today = time.strftime("%Y-%m-%d")
+    try:
+        lines = daily_file.read_text(encoding='utf-8').split('\n')
+        show = False
+        output = []
+        for line in lines:
+            if line.startswith('## ') and today in line:
+                show = True
+                output.append(line)
+            elif line.startswith('## ') and today not in line:
+                if show:
+                    break
+            elif show:
+                output.append(line)
+        if output:
+            print(f"\n{Colors.CYAN}{'='*63}")
+            print(f"  \U0001f4cb DAGENS OPDATERING — {today}")
+            print(f"{'='*63}{Colors.END}")
+            for line in output:
+                if line.strip():
+                    print(f"  {line}")
+            print(f"\n{Colors.CYAN}{'='*63}{Colors.END}\n")
+    except Exception:
+        pass
+
+
+def main():
+    """Hovedprogram"""
+    
+    # Parse args
+    batch_mission = None
+    batch_model = None
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        if args[i] == '--model' and i+1 < len(args):
+            batch_model = args[i+1]; i += 2
+        elif args[i] == '--batch' and i+1 < len(args):
+            batch_mission = args[i+1]; i += 2
+        elif not args[i].startswith('-') and not batch_mission:
+            batch_mission = args[i]; i += 1
+        else:
+            i += 1
+    
+    # Opret agent
+    agent = GrokAgent()
+    agent.interactive = True
+    
+    # Sæt model hvis angivet
+    if batch_model:
+        agent.switch_model('ollama', batch_model)
+    
+    # BATCH MODE — kør én mission og afslut
+    if batch_mission:
+        agent.interactive = False
+        response = agent.run(batch_mission)
+        print(f"\n{Colors.CYAN}BATCH COMPLETE! 🤖💚{Colors.END}\n")
+        agent.memory.save_session()
+    
+    # Banner
+    print_banner(agent)
+    
+    # 🧠 AUTO-LOAD MEMORY — læs sidste session ved startup
+    recent = agent.memory.get_recent_messages(10)
+    if recent:
+        print(f"\n{Colors.YELLOW}{'═'*60}{Colors.END}")
+        print(f"{Colors.BOLD}{Colors.CYAN}🧠 SIDSTE {len(recent)} BESKEDER FRA MEMORY:{Colors.END}")
+        print(f"{Colors.YELLOW}{'═'*60}{Colors.END}")
+        for msg in recent:
+            role = msg.get("role", "?")
+            content = msg.get("content", "")
+            ts = msg.get("timestamp", "")
+            if role == "user":
+                icon = "👤"
+                color = Colors.GREEN
+            else:
+                icon = "🤖"
+                color = Colors.CYAN
+            # Trim lange beskeder
+            display = content[:150] + "..." if len(content) > 150 else content
+            print(f"  {icon} {color}{display}{Colors.END}  {Colors.DIM}{ts}{Colors.END}")
+        print(f"{Colors.YELLOW}{'═'*60}{Colors.END}\n")
+        # Inject i context
+        agent.memory.load_last_session(10)
+    
+    print_daily_update()
+    print_model_status(agent.router)
+    print_commands()
+    
+    # Signal handler — gem ved Ctrl+C
+    def signal_handler(sig, frame):
+        agent.memory.save_session()
+        print(f"\n\n{Colors.CYAN}Afbrudt. Alt er gemt! 🤖💚{Colors.END}\n")
+        sys.exit(0)
+    
+    signal.signal(signal.SIGINT, signal_handler)
+    while True:
+        try:
+            print(f"{Colors.BOLD}{Colors.BLUE}━━━ You ━━━{Colors.END} ", end="", flush=True)
+            user_input = input().strip()
+            
+            if not user_input:
+                continue
+            
+            # Tjek for /kommando
+            if user_input.startswith('/'):
+                result = handle_command(agent, user_input)
+                if result is False:
+                    break
+                if result is True:
+                    continue
+            
+            # Kør agent
+            start_time = time.time()
+            response = agent.run(user_input)
+            elapsed = time.time() - start_time
+            
+            # Vis tid
+            print(f"{Colors.DIM}[{elapsed:.1f}s | turn {agent.total_turns} | {agent.total_tools_used} tools]{Colors.END}")
+            
+        except EOFError:
+            agent.memory.save_session()
+            print(f"\n{Colors.CYAN}Farvel! Alt er gemt! 🤖💚{Colors.END}\n")
+            break
+        except KeyboardInterrupt:
+            agent.memory.save_session()
+            print(f"\n\n{Colors.CYAN}Afbrudt. Alt er gemt! 🤖💚{Colors.END}\n")
+            break
+        except Exception as e:
+            print(f"\n{Colors.RED}[FEJL] {str(e)}{Colors.END}")
+    
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
