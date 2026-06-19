@@ -12,6 +12,9 @@ SSH_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 KNOWN_HOSTS_FILE = SSH_CONFIG_DIR / "known_hosts.json"
 
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def ssh_run(target: str) -> str:
     """Run a command on a remote machine via SSH. 
     Input: 'host command' or 'user@host command' or 'user@host -p port command'
@@ -37,7 +40,7 @@ def ssh_run(target: str) -> str:
         
         ssh_cmd.extend([host, command])
         
-        r = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=60)
+        r = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         output = ""
         if r.stdout:
             output += r.stdout[:3000]
@@ -64,7 +67,7 @@ def ssh_copy(target: str) -> str:
         dst = parts[1]
         
         r = subprocess.run(["scp", "-o", "StrictHostKeyChecking=accept-new", src, dst],
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return f"✅ Fil kopieret: {src} → {dst}"
         return f"[FEJL] {r.stderr[:300]}"
@@ -92,7 +95,7 @@ def ssh_tunnel(target: str) -> str:
         r = subprocess.run(
             ["ssh", "-N", "-L", f"{local_port}:localhost:{remote_port}", host],
             capture_output=True, text=True, timeout=15
-        )
+        , encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return f"[INFO] SSH tunnel oprettet: localhost:{local_port} → {host}:{remote_port}"
     
     except subprocess.TimeoutExpired:
@@ -231,16 +234,16 @@ def enable_ssh() -> str:
     """Enable SSH server on Kali so other PCs can connect."""
     try:
         # Start SSH
-        r = subprocess.run(["sudo", "systemctl", "start", "ssh"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["sudo", "systemctl", "start", "ssh"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode != 0:
             # Try sshd directly
-            r = subprocess.run(["sudo", "sshd"], capture_output=True, text=True, timeout=10)
+            r = subprocess.run(["sudo", "sshd"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         
         # Enable on boot
-        subprocess.run(["sudo", "systemctl", "enable", "ssh"], capture_output=True, text=True, timeout=10)
+        subprocess.run(["sudo", "systemctl", "enable", "ssh"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         
         # Get IP
-        r = subprocess.run(["hostname", "-I"], capture_output=True, text=True, timeout=5)
+        r = subprocess.run(["hostname", "-I"], capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         ip = r.stdout.strip().split()[0] if r.stdout.strip() else "?"
         
         return f"""✅ SSH server slået til!

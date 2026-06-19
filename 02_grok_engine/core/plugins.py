@@ -33,6 +33,9 @@ if not _installed_file.exists():
     _installed_file.write_text(json.dumps({}, indent=2))
 
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def _load_plugins() -> dict:
     """Load all plugins from ~/.grok/plugins/*.json"""
     plugins = {}
@@ -122,7 +125,7 @@ def plugin_run(name: str, input_data: str = "") -> str:
     
     try:
         if plugin.get("type") == "shell":
-            r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60)
+            r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             output = r.stdout[:3000] if r.stdout else r.stderr[:500]
             return output if output else f"[Plugin {name} kørte uden output]"
         elif plugin.get("type") == "python":

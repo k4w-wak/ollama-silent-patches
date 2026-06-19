@@ -11,6 +11,9 @@ from typing import Optional, Dict, Any
 
 MCP_CONFIG_FILE = Path.home() / ".grok" / "mcp_servers.json"
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def _ensure_config():
     MCP_CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not MCP_CONFIG_FILE.exists():
@@ -110,7 +113,7 @@ def mcp_call(server_name: str, tool_name: str, arguments: dict = None) -> str:
                 input=json.dumps(request),
                 capture_output=True, text=True, timeout=30,
                 env=env
-            )
+            , encoding='utf-8', errors='replace')
             
             if proc.returncode != 0:
                 return json.dumps({"error": f"MCP server returned code {proc.returncode}", "stderr": proc.stderr[:500]})
@@ -177,7 +180,7 @@ def mcp_list_tools(server_name: str) -> str:
                 input=json.dumps(request),
                 capture_output=True, text=True, timeout=15,
                 env=env
-            )
+            , encoding='utf-8', errors='replace')
             
             try:
                 response = json.loads(proc.stdout)

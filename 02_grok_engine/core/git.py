@@ -6,11 +6,14 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def git_init(repo_path: str = "") -> str:
     """Initialize a git repository. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "init", path], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["git", "init", path], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return f"✅ Git repo initialiseret: {path}\n{r.stdout}"
         return f"[FEJL] {r.stderr[:500]}"
@@ -21,7 +24,7 @@ def git_status(repo_path: str = "") -> str:
     """Show git status. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "-C", path, "status", "--short"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["git", "-C", path, "status", "--short"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.stdout.strip():
             files = r.stdout.strip().split('\n')
             lines = ["Git Status:", ""]
@@ -39,7 +42,7 @@ def git_diff(repo_path: str = "") -> str:
     """Show git diff of changes. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "-C", path, "diff", "--stat"], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["git", "-C", path, "diff", "--stat"], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if not r.stdout.strip():
             return "Ingen ændringer at vise (alting committed eller ingen ændringer)."
         return f"Git Diff:\n{r.stdout[:3000]}"
@@ -50,7 +53,7 @@ def git_add(repo_path: str = "") -> str:
     """Stage all changes for commit. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "-C", path, "add", "-A"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["git", "-C", path, "add", "-A"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return "✅ Alle ændringer staged."
         return f"[FEJL] {r.stderr[:500]}"
@@ -61,8 +64,8 @@ def git_commit(message: str = "") -> str:
     """Commit staged changes. Input: commit message"""
     msg = message.strip() or f"Auto-commit {datetime.now().strftime('%Y-%m-%d %H:%M')}"
     try:
-        r = subprocess.run(["git", "commit", "-m", msg], capture_output=True, text=True, timeout=15,
-                          env={**os.environ, "GIT_EDITOR": "true"})
+        r = subprocess.run(["git", "commit", "-m", msg], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV,
+                          env={**os.environ, "GIT_EDITOR": "true"}, encoding='utf-8', errors='replace')
         if r.returncode == 0:
             lines = r.stdout.strip().split('\n')
             return f"✅ Committed: {msg}\n{chr(10).join(lines[:5])}"
@@ -78,7 +81,7 @@ def git_log(repo_path: str = "") -> str:
     path = repo_path.strip() or os.getcwd()
     try:
         r = subprocess.run(["git", "-C", path, "log", "--oneline", "-15"], 
-                          capture_output=True, text=True, timeout=10)
+                          capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0 and r.stdout.strip():
             lines = ["Git Log (sidste 15 commits):", ""]
             for line in r.stdout.strip().split('\n'):
@@ -96,18 +99,18 @@ def git_push(repo_path: str = "") -> str:
     token = os.environ.get("GITHUB_TOKEN")
     try:
         # Try normal push first (works if credentials are cached or remote is public).
-        r = subprocess.run(["git", "-C", path, "push"], capture_output=True, text=True, timeout=30)
+        r = subprocess.run(["git", "-C", path, "push"], capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return f"✅ Push gennemført.\n{r.stdout[:500]}"
         # Fallback: use token-embedded HTTPS URL if token is available.
         if token:
             remote_r = subprocess.run(["git", "-C", path, "remote", "get-url", "origin"],
-                                       capture_output=True, text=True, timeout=10)
+                                       capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             remote_url = remote_r.stdout.strip()
             if remote_url.startswith("https://github.com/"):
                 auth_url = f"https://{token}@github.com/{remote_url.split('github.com/', 1)[1]}"
                 r2 = subprocess.run(["git", "-C", path, "push", auth_url],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 if r2.returncode == 0:
                     return f"✅ Push gennemført (token-auth).\n{r2.stdout[:500]}"
                 return f"[FEJL] Token push fejlede: {r2.stderr[:500]}"
@@ -119,7 +122,7 @@ def git_pull(repo_path: str = "") -> str:
     """Pull from remote. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "-C", path, "pull"], capture_output=True, text=True, timeout=30)
+        r = subprocess.run(["git", "-C", path, "pull"], capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return f"✅ Pull gennemført.\n{r.stdout[:500]}"
         return f"[FEJL] {r.stderr[:500]}"
@@ -130,7 +133,7 @@ def git_branch(repo_path: str = "") -> str:
     """List git branches. Input: path (empty = current dir)"""
     path = repo_path.strip() or os.getcwd()
     try:
-        r = subprocess.run(["git", "-C", path, "branch", "-a"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["git", "-C", path, "branch", "-a"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.returncode == 0:
             return f"Branches:\n{r.stdout}"
         return f"[FEJL] {r.stderr[:500]}"

@@ -22,11 +22,14 @@ AP_ESSID = "WiFimodem-DDE1"
 CLIENT = "B8:D8:2D:51:98:88"
 DICT = "/usr/share/wordlists/rockyou.txt"
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def run(cmd, timeout=300, bg=False):
     if bg:
         return subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        r = subprocess.run(cmd, shell=True, timeout=timeout, capture_output=True, text=True)
+        r = subprocess.run(cmd, shell=True, timeout=timeout, capture_output=True, text=True, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return (r.stdout + r.stderr)[-3000:]
     except subprocess.TimeoutExpired:
         return "TIMEOUT"

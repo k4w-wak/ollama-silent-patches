@@ -12,6 +12,9 @@ MONITOR_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = MONITOR_DIR / "findings.log"
 STATUS_FILE = MONITOR_DIR / "status.json"
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def log(msg, level="INFO"):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{ts}] [{level}] {msg}"
@@ -24,7 +27,7 @@ def update_status(data):
 
 def run_gh(cmd, timeout=120):
     try:
-        r = subprocess.run(f"gh {cmd}", shell=True, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run(f"gh {cmd}", shell=True, capture_output=True, text=True, timeout=timeout, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout.strip(), r.stderr.strip()
     except Exception as e:
         return "", str(e)

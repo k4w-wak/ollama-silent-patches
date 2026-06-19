@@ -12,6 +12,9 @@ HOOKS_DIR = Path.home() / ".grok" / "hooks"
 HOOKS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def _load_hooks() -> dict:
     """Load hooks config from ~/.grok/hooks/hooks.json"""
     hooks_file = HOOKS_DIR / "hooks.json"
@@ -138,7 +141,7 @@ def hooks_run(event: str, tool_name: str, tool_input: str = "", tool_output: str
             cmd = cmd.replace("{output}", tool_output[:200])
             cmd = cmd.replace("{timestamp}", datetime.now().isoformat())
             
-            r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
+            r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             
             if r.returncode != 0:
                 # Non-zero exit = deny (for pre_tool hooks)

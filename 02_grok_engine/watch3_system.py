@@ -4,6 +4,9 @@ import os, time, subprocess, json
 
 R='\033[91m'; G='\033[92m'; Y='\033[93m'; C='\033[96m'; B='\033[1m'; D='\033[2m'; E='\033[0m'
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def ok(test): return f"{G}●{E}" if test else f"{R}●{E}"
 
 print(f"{B}{Y}╔══════════════════════════════════════════════╗\n║        SYSTEM HEALTH — hvert sekund          ║\n╚══════════════════════════════════════════════╝{E}")
@@ -14,7 +17,7 @@ while True:
     
     # Ollama
     try:
-        r = subprocess.run("curl -s http://127.0.0.1:11434/api/tags", shell=True, capture_output=True, text=True, timeout=2)
+        r = subprocess.run("curl -s http://127.0.0.1:11434/api/tags", shell=True, capture_output=True, text=True, timeout=2, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         up = r.returncode == 0 and r.stdout.strip()
         if up:
             print(f"  {ok(True)} Ollama: {G}ONLINE{E}")
@@ -25,7 +28,7 @@ while True:
     
     # FCC Proxy
     try:
-        r = subprocess.run("curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8082/v1/models", shell=True, capture_output=True, text=True, timeout=2)
+        r = subprocess.run("curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8082/v1/models", shell=True, capture_output=True, text=True, timeout=2, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         up = r.stdout.strip() == '200'
         print(f"  {ok(up)} FCC Proxy: {G+'ONLINE — Claude 4 via NVIDIA'+E if up else R+'DOWN'+E}")
     except:
@@ -54,9 +57,9 @@ while True:
     
     # Hardware
     try:
-        r = subprocess.run("df -h / | tail -1 | awk '{print $4\" fri af \"$2\" (WSL)\"}'", shell=True, capture_output=True, text=True, timeout=2)
+        r = subprocess.run("df -h / | tail -1 | awk '{print $4\" fri af \"$2\" (WSL)\"}'", shell=True, capture_output=True, text=True, timeout=2, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         disk = r.stdout.strip()
-        r = subprocess.run("free -h | grep Mem | awk '{print $7\" ledig af \"$2\" (aktiv)\"}'", shell=True, capture_output=True, text=True, timeout=2)
+        r = subprocess.run("free -h | grep Mem | awk '{print $7\" ledig af \"$2\" (aktiv)\"}'", shell=True, capture_output=True, text=True, timeout=2, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         mem = r.stdout.strip()
         print(f"  {ok(True)} HOST PC: 250GB SSD | 24GB DDR4 | Radeon GPU")
         print(f"  {D}  WSL disk: {disk}")

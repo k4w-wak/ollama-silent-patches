@@ -39,6 +39,21 @@ class ModelStatus:
     error: Optional[str] = None
 
 
+
+def _fix_double_utf8(text: str) -> str:
+    """
+    Ollama Cloud har set dobbelt-UTF-8-mojibake i SSE streams.
+    Gendan korrekte tegn hvis vi ser typiske mojibake-mønstre.
+    """
+    if not text:
+        return text
+    if any(c in text for c in ("Ã¦", "Ã¸", "Ã¥", "Ã©", "Ã¼", "Ã±", "Ã", "â")):
+        try:
+            return text.encode("latin-1").decode("utf-8")
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            return text
+    return text
+
 class ModelRouter:
     """
     Router der automatisk vælger den bedste tilgængelige model.
@@ -234,6 +249,7 @@ class ModelRouter:
             return False
         return model.endswith(":cloud") or ":cloud:" in model
     
+
     def chat_ollama_cloud(
         self,
         messages: list,
@@ -322,11 +338,11 @@ class ModelRouter:
                             choice = data.get("choices", [{}])[0]
                             delta = choice.get("delta", {})
                             if delta.get("content"):
-                                piece = delta["content"]
+                                piece = _fix_double_utf8(delta["content"])
                                 full_content += piece
                                 yield {"type": "content", "content": piece}
                             if delta.get("reasoning"):
-                                piece = delta["reasoning"]
+                                piece = _fix_double_utf8(delta["reasoning"])
                                 full_reasoning += piece
                                 yield {"type": "reasoning", "content": piece}
                             for tc in delta.get("tool_calls") or []:
@@ -383,8 +399,8 @@ class ModelRouter:
                 
                 choice = data.get("choices", [{}])[0]
                 msg = choice.get("message", {})
-                content = msg.get("content", "")
-                reasoning = msg.get("reasoning", "")
+                content = _fix_double_utf8(msg.get("content", ""))
+                reasoning = _fix_double_utf8(msg.get("reasoning", ""))
                 tool_calls = msg.get("tool_calls")
                 
                 # Cost tracking

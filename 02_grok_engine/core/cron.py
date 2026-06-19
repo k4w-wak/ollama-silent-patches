@@ -17,6 +17,9 @@ CRON_FILE = CRON_DIR / "jobs.json"
 _active_jobs = {}
 
 
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def _load_jobs() -> dict:
     """Load cron jobs from file."""
     if CRON_FILE.exists():
@@ -130,7 +133,7 @@ def cron_run_once(job_id: str) -> str:
         return f"[FEJL] Job {job_id} ikke fundet."
     
     try:
-        r = subprocess.run(job["command"], shell=True, capture_output=True, text=True, timeout=120)
+        r = subprocess.run(job["command"], shell=True, capture_output=True, text=True, timeout=120, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         output = r.stdout[:2000] if r.stdout else r.stderr[:500]
         
         # Update last run
@@ -163,7 +166,7 @@ def _start_job(job: dict):
             
             # Run the command
             try:
-                r = subprocess.run(job["command"], shell=True, capture_output=True, text=True, timeout=120)
+                r = subprocess.run(job["command"], shell=True, capture_output=True, text=True, timeout=120, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 
                 # Save result
                 result_file = CRON_DIR / f"{job_id}_result.txt"

@@ -1400,10 +1400,51 @@ def main():
 
     signal.signal(signal.SIGINT, signal_handler)
 
+    def _read_input():
+        """Read a single- or multi-line prompt from the user."""
+        print(f"{Colors.BOLD}{Colors.BLUE}━━━ You ━━━{Colors.END} ", end="", flush=True)
+        first = input()
+        # Strip trailing newline artifacts; preserve intentional leading space
+        line = first.rstrip("\n")
+
+        # Triple-quoted block
+        if line.startswith('"""'):
+            buffer = [line]
+            # If the entire prompt is on one line, return it as-is
+            if line != '"""' and line.endswith('"""') and len(line) > 3:
+                return line
+            while True:
+                print(f"{Colors.DIM}...{Colors.END} ", end="", flush=True)
+                try:
+                    next_line = input()
+                except EOFError:
+                    break
+                buffer.append(next_line)
+                if next_line.strip() == '"""':
+                    break
+            return "\n".join(buffer)
+
+        # Backslash line continuation
+        if line.endswith("\\"):
+            buffer = [line[:-1]]
+            while True:
+                print(f"{Colors.DIM}...{Colors.END} ", end="", flush=True)
+                try:
+                    next_line = input()
+                except EOFError:
+                    break
+                if next_line.endswith("\\"):
+                    buffer.append(next_line[:-1])
+                else:
+                    buffer.append(next_line)
+                    break
+            return "\n".join(buffer)
+
+        return line
+
     while True:
         try:
-            print(f"{Colors.BOLD}{Colors.BLUE}━━━ You ━━━{Colors.END} ", end="", flush=True)
-            user_input = input().strip()
+            user_input = _read_input().strip()
 
             if not user_input:
                 continue

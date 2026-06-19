@@ -25,6 +25,9 @@ MOBILE_TOOLS_DIR = os.path.join(PROJECT_DIR, "mobile_tools")
 ADB_BIN = os.path.join(MOBILE_TOOLS_DIR, "adb")
 
 # Output directory: prefer ~/Skrivebord if it exists, otherwise project/reports/output
+# === PERMANENT UTF-8 ENCODING FIX ===
+_UTF8_ENV = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8'}
+
 def _output_dir() -> str:
     desktop = os.path.expanduser("~/Skrivebord")
     if os.path.isdir(desktop):
@@ -71,7 +74,7 @@ def _project_venv_python() -> str:
                 result = subprocess.run(
                     [py, "-c", "from playwright.sync_api import sync_playwright; print('OK')"],
                     capture_output=True, text=True, timeout=5
-                )
+                , encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 if "OK" in result.stdout:
                     return py
             except Exception:
@@ -132,7 +135,7 @@ def _run_cli(cmd: str, timeout: int = 60) -> str:
     """Helper: run a CLI command and return output."""
     import subprocess
     try:
-        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         output = ""
         if r.stdout:
             output += r.stdout[:8000]
@@ -149,7 +152,7 @@ def _run_cli_env(cmd: str, timeout: int = 60, env: dict = None) -> str:
     """Helper: run a CLI command with custom environment."""
     import subprocess
     try:
-        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout, env=env or os.environ)
+        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout, env=env or os.environ, encoding='utf-8', errors='replace')
         output = ""
         if r.stdout:
             output += r.stdout[:8000]
@@ -315,7 +318,7 @@ def grep_search(data: str) -> str:
         result = subprocess.run(
             ['grep', '-rn', '--no-messages', pattern, directory],
             capture_output=True, text=True, timeout=10
-        )
+        , encoding='utf-8', errors='replace', env=_UTF8_ENV)
         
         output = result.stdout
         if len(output) > MAX_TOOL_OUTPUT:
@@ -383,6 +386,9 @@ def bash(command: str) -> str:
             capture_output=True,
             text=True,
             timeout=MAX_BASH_TIMEOUT,
+            encoding='utf-8',
+            errors='replace',
+            env=_UTF8_ENV,
         )
         
         output = ""
@@ -445,7 +451,7 @@ def system_info(_) -> str:
         info = {}
         
         # OS
-        result = subprocess.run(['uname', '-a'], capture_output=True, text=True)
+        result = subprocess.run(['uname', '-a'], capture_output=True, text=True, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         info['os'] = result.stdout.strip()
         
         # User
@@ -453,7 +459,7 @@ def system_info(_) -> str:
         info['cwd'] = os.getcwd()
         
         # Disk
-        result = subprocess.run(['df', '-h', '/'], capture_output=True, text=True)
+        result = subprocess.run(['df', '-h', '/'], capture_output=True, text=True, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         info['disk'] = result.stdout.strip()
         
         # GPU
@@ -461,14 +467,14 @@ def system_info(_) -> str:
             result = subprocess.run(
                 ['nvidia-smi', '--query-gpu=name,memory.total,temperature.gpu,utilization.gpu', '--format=csv,noheader'],
                 capture_output=True, text=True
-            )
+            , encoding='utf-8', errors='replace', env=_UTF8_ENV)
             if result.returncode == 0:
                 info['gpu'] = result.stdout.strip()
         except:
             pass
         
         # Memory
-        result = subprocess.run(['free', '-h'], capture_output=True, text=True)
+        result = subprocess.run(['free', '-h'], capture_output=True, text=True, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         info['memory'] = result.stdout.strip()
         
         output = ""
@@ -508,7 +514,7 @@ def web_search(query: str) -> str:
                 ['curl', '-s', '-L', '--max-time', '10',
                  f'https://html.duckduckgo.com/html/?q={q}'],
                 capture_output=True, text=True, timeout=15
-            )
+            , encoding='utf-8', errors='replace', env=_UTF8_ENV)
             if result.returncode == 0 and 'anomaly-modal' not in result.stdout:
                 html = result.stdout
                 results = []
@@ -534,7 +540,7 @@ def http_get(url: str) -> str:
         result = subprocess.run(
             curl_cmd,
             capture_output=True, text=True, timeout=20
-        )
+        , encoding='utf-8', errors='replace', env=_UTF8_ENV)
         
         if result.returncode == 0:
             content = result.stdout[:MAX_TOOL_OUTPUT]
@@ -585,7 +591,7 @@ def osint_ip(ip: str) -> str:
     results = []
     # Whois
     try:
-        r = subprocess.run(["whois", ip], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["whois", ip], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         whois_lines = [l for l in r.stdout.split('\n') if any(k in l.lower() for k in ['country', 'netname', 'org', 'descr', 'address', 'inetnum', 'abuse'])]
         results.append("WHOIS:\n" + '\n'.join(whois_lines[:15]))
     except: results.append("WHOIS: Fejlede")
@@ -607,7 +613,7 @@ def osint_ip(ip: str) -> str:
     
     # Reverse DNS
     try:
-        r = subprocess.run(["nslookup", ip], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["nslookup", ip], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"REVERSE DNS: {r.stdout.strip()[:200]}")
     except: results.append("REVERSE DNS: Fejlede")
     
@@ -617,7 +623,7 @@ def osint_ip(ip: str) -> str:
         rev = '.'.join(ip.split('.')[::-1])
         for bl in ['zen.spamhaus.org', 'bl.spamcop.net', 'dnsbl.sorbs.net']:
             try:
-                r = subprocess.run(["dig", "+short", f"{rev}.{bl}"], capture_output=True, text=True, timeout=10)
+                r = subprocess.run(["dig", "+short", f"{rev}.{bl}"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 if r.stdout.strip():
                     blocked.append(f"{bl}: LISTET ({r.stdout.strip()})")
                 else:
@@ -646,20 +652,20 @@ def osint_domain(domain: str) -> str:
     results = []
     # Whois
     try:
-        r = subprocess.run(["whois", domain], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["whois", domain], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         whois_lines = [l for l in r.stdout.split('\n') if any(k in l.lower() for k in ['country', 'registrar', 'name server', 'creation', 'expir', 'owner', 'organisation'])]
         results.append("WHOIS:\n" + '\n'.join(whois_lines[:20]))
     except: results.append("WHOIS: Fejlede")
     
     # DNS lookup
     try:
-        r = subprocess.run(["dig", "+short", domain], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", domain], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"DNS A RECORDS: {r.stdout.strip()}")
     except: results.append("DNS: Fejlede")
     
     # MX records
     try:
-        r = subprocess.run(["dig", "+short", "MX", domain], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", "MX", domain], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"MX RECORDS: {r.stdout.strip()}")
     except: results.append("MX: Fejlede")
     
@@ -710,7 +716,7 @@ def nmap_scan(target: str) -> str:
         
         cmd.append(host)
         
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else f"[FEJL] {r.stderr[:500]}"
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] nmap tog for lang tid"
@@ -737,7 +743,7 @@ def osint_harvest(target: str) -> str:
     """theHarvester - Indsaeml emails, subdomains, hostnames fra kilder som Google, Bing, LinkedIn. Input: domene (fx evil.com)"""
     try:
         r = subprocess.run(["theHarvester", "-d", target, "-b", "all", "-l", "100"],
-                          capture_output=True, text=True, timeout=90)
+                          capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -750,7 +756,7 @@ def web_vuln_scan(target: str) -> str:
     try:
         env = {**os.environ, "PERL5LIB": os.path.expanduser("~/perl5/lib/perl5")}
         r = subprocess.run(["/home/admin_user/bin/nikto", "-h", target, "-maxtime", "90s"],
-                          capture_output=True, text=True, timeout=120, env=env)
+                          capture_output=True, text=True, timeout=120, env=env, encoding='utf-8', errors='replace')
         result = r.stdout[:3000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -764,7 +770,7 @@ def dir_scan(target: str) -> str:
         r = subprocess.run(["gobuster", "dir", "-u", target, "-w",
                            "/home/admin_user/SecLists/Discovery/Web-Content/common.txt", "-t", "50", "-q", "--timeout", "10s"],
                           capture_output=True, text=True, timeout=180,
-                          env={**os.environ, "PERL5LIB": os.path.expanduser("~/perl5/lib/perl5")})
+                          env={**os.environ, "PERL5LIB": os.path.expanduser("~/perl5/lib/perl5")}, encoding='utf-8', errors='replace')
         result = r.stdout[:3000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -777,39 +783,39 @@ def dns_enum(target: str) -> str:
     results = []
     # A record
     try:
-        r = subprocess.run(["dig", "+short", target, "A"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", target, "A"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"A RECORDS: {r.stdout.strip()}")
     except: results.append("A RECORDS: Fejlede")
     # MX record
     try:
-        r = subprocess.run(["dig", "+short", target, "MX"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", target, "MX"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"MX RECORDS: {r.stdout.strip()}")
     except: results.append("MX RECORDS: Fejlede")
     # TXT record
     try:
-        r = subprocess.run(["dig", "+short", target, "TXT"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", target, "TXT"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"TXT RECORDS: {r.stdout.strip()}")
     except: results.append("TXT RECORDS: Fejlede")
     # NS record
     try:
-        r = subprocess.run(["dig", "+short", target, "NS"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", target, "NS"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"NS RECORDS: {r.stdout.strip()}")
     except: results.append("NS RECORDS: Fejlede")
     # DNSSEC
     try:
-        r = subprocess.run(["dig", "+short", target, "DNSKEY"], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["dig", "+short", target, "DNSKEY"], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         key = r.stdout.strip()
         results.append(f"DNSSEC: {'Ja' if key else 'Nej'}")
     except: results.append("DNSSEC: Fejlede")
     # Subdomain enumeration with dnsrecon
     try:
         r = subprocess.run(["dnsrecon", "-d", target, "-t", "std", "--lifetime", "5"],
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         results.append(f"\nDNSRECON:\n{r.stdout[:2000]}")
     except: results.append("DNSRECON: Fejlede")
     # WHOIS
     try:
-        r = subprocess.run(["whois", target], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["whois", target], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         whois_lines = [l for l in r.stdout.split('\n') if any(k in l.lower() for k in ['country', 'registrar', 'creation', 'expir', 'name server', 'organisation'])]
         results.append(f"\nWHOIS:\n" + '\n'.join(whois_lines[:10]))
     except: results.append("WHOIS: Fejlede")
@@ -819,7 +825,7 @@ def dns_enum(target: str) -> str:
 def wifi_scan(interface: str = "wlan0") -> str:
     """Wi-Fi netvaerk scanner. Finder tilgaengelige netvaerk. Input: interface (fx wlan0)"""
     try:
-        r = subprocess.run(["iwlist", interface, "scan"], capture_output=True, text=True, timeout=30)
+        r = subprocess.run(["iwlist", interface, "scan"], capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         # Extract ESSID, encryption, signal
         networks = []
         for line in r.stdout.split('\n'):
@@ -835,7 +841,7 @@ def password_bruteforce(target: str) -> str:
         parts = target.split()
         if len(parts) < 3:
             return "[FEJL] Format: protocol://target port wordlist user (fx ssh://192.168.1.1 22 /usr/share/wordlists/rockyou.txt admin)"
-        r = subprocess.run(["hydra"] + parts, capture_output=True, text=True, timeout=90)
+        r = subprocess.run(["hydra"] + parts, capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:2000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -854,7 +860,7 @@ def sql_injection(target: str) -> str:
     """SQLMap - SQL injection scanner. Input: URL (fx http://target.com/page?id=1)"""
     try:
         r = subprocess.run(["sqlmap", "-u", target, "--batch", "--random-agent", "--level", "1", "--risk", "1"],
-                          capture_output=True, text=True, timeout=90)
+                          capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -866,7 +872,7 @@ def wifi_scan_detailed(interface: str = "wlan0") -> str:
     """Airbase-ng Wi-Fi scanner. Finder tilgaengelige netvaerk med detaljer. Input: interface (fx wlan0)"""
     try:
         # First check if monitor mode is possible
-        r = subprocess.run(["iwlist", interface, "scan"], capture_output=True, text=True, timeout=30)
+        r = subprocess.run(["iwlist", interface, "scan"], capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         networks = []
         current = {}
         for line in r.stdout.split('\n'):
@@ -911,7 +917,7 @@ def packet_capture(target: str = "eth0", duration: int = 10) -> str:
             if p.count('.') == 3:
                 # IP adresse — find route interface
                 try:
-                    r = subprocess.run(["ip", "route", "get", p], capture_output=True, text=True, timeout=5)
+                    r = subprocess.run(["ip", "route", "get", p], capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                     # Output: "176.130.181.234 via ... dev eth0 src ..."
                     for word in r.stdout.split():
                         if word == "dev":
@@ -925,7 +931,7 @@ def packet_capture(target: str = "eth0", duration: int = 10) -> str:
         
         duration = min(dur, 60)  # Max 60 sekunder
         r = subprocess.run(["tshark", "-i", iface, "-a", f"duration:{duration}", "-c", "100"],
-                          capture_output=True, text=True, timeout=duration + 15)
+                          capture_output=True, text=True, timeout=duration + 15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:500]
         return result if result else "[INGEN PAKKER FUNDET]"
     except subprocess.TimeoutExpired:
@@ -938,7 +944,7 @@ def metasploit_exploit(module: str) -> str:
     try:
         # Use msfconsole in resource mode
         r = subprocess.run(["msfconsole", "-q", "-x", f"use {module}; show options"],
-                          capture_output=True, text=True, timeout=30)
+                          capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:1000]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -951,7 +957,7 @@ def password_crack(target: str) -> str:
     try:
         # Hvis det er en fil
         if os.path.exists(target):
-            r = subprocess.run(["john", "--show", target], capture_output=True, text=True, timeout=30)
+            r = subprocess.run(["john", "--show", target], capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             result = r.stdout[:2000] if r.stdout else r.stderr[:500]
             return result if result else "[INGENE PASSWORD FUNDET]"
         
@@ -963,7 +969,7 @@ def password_crack(target: str) -> str:
                 f.write(target + '\n')
                 tmpfile = f.name
             r = subprocess.run(["john", "--wordlist=/usr/share/wordlists/rockyou.txt", tmpfile],
-                              capture_output=True, text=True, timeout=60)
+                              capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             result = r.stdout[:2000] if r.stdout else r.stderr[:500]
             os.unlink(tmpfile)
             return result if result else "[INGENE PASSWORD FUNDET]"
@@ -981,7 +987,7 @@ def hashcat_crack(target: str) -> str:
         if os.path.exists(target):
             # Auto-detect hash type
             r = subprocess.run(["/tmp/hashcat-new/hashcat-6.2.6/hashcat.bin", "-m", "0", target, "-a", "3", "?a?a?a?a?a?a?a?a", "--force", "-d", "2", "-w", "3"],
-                              capture_output=True, text=True, timeout=90)
+                              capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             result = r.stdout[:2000] if r.stdout else r.stderr[:1000]
             return result if result else "[INGEN RESULTATER]"
         else:
@@ -1505,9 +1511,9 @@ def sslscan_tool(target: str) -> str:
     """SSL/TLS scanner. Input: 'hostname'"""
     target = target.strip().replace("https://","").replace("http://","").split("/")[0]
     r = subprocess.run(["openssl", "s_client", "-connect", f"{target}:443", "-servername", target],
-                       capture_output=True, text=True, timeout=15)
+                       capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
     cert = subprocess.run(["openssl", "x509", "-noout", "-subject", "-issuer", "-dates", "-text"],
-                         input=r.stdout, capture_output=True, text=True, timeout=10)
+                         input=r.stdout, capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
     protocol = [l for l in r.stdout.split("\n") if "Protocol" in l or "Cipher" in l]
     return f"[SSL SCAN: {target}]\nProtocol: {chr(10).join(protocol[:5])}\n\nCertificate:\n{cert.stdout[:2000]}"
 
@@ -2484,11 +2490,11 @@ def pip_audit_tool(target: str) -> str:
         if os.path.isdir(target):
             req_file = os.path.join(target, "requirements.txt")
             if os.path.exists(req_file):
-                r = subprocess.run(["pip-audit", "-r", req_file, "--format", "json"], capture_output=True, text=True, timeout=120)
+                r = subprocess.run(["pip-audit", "-r", req_file, "--format", "json"], capture_output=True, text=True, timeout=120, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             else:
-                r = subprocess.run(["pip-audit", "--format", "json", "--desc"], capture_output=True, text=True, timeout=120, cwd=target)
+                r = subprocess.run(["pip-audit", "--format", "json", "--desc"], capture_output=True, text=True, timeout=120, cwd=target, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         else:
-            r = subprocess.run(["pip-audit", "-r", target, "--format", "json"], capture_output=True, text=True, timeout=120)
+            r = subprocess.run(["pip-audit", "-r", target, "--format", "json"], capture_output=True, text=True, timeout=120, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         
         output = r.stdout or r.stderr or ""
         if not output:
@@ -2527,7 +2533,7 @@ def go_vulncheck_tool(target: str) -> str:
     if not os.path.exists(govulncheck):
         return "[FEJL] govulncheck ikke installeret"
     try:
-        r = subprocess.run([govulncheck, "-json", "./..."], capture_output=True, text=True, timeout=120, cwd=target)
+        r = subprocess.run([govulncheck, "-json", "./..."], capture_output=True, text=True, timeout=120, cwd=target, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         output = r.stdout + r.stderr
         vulns = []
         for line in output.split(chr(10)):
@@ -2559,7 +2565,7 @@ def npm_audit_tool(target: str) -> str:
     if not os.path.exists(os.path.join(target, "package.json")):
         return "[FEJL] Ingen package.json i " + target
     try:
-        r = subprocess.run(["npm", "audit", "--json"], capture_output=True, text=True, timeout=120, cwd=target)
+        r = subprocess.run(["npm", "audit", "--json"], capture_output=True, text=True, timeout=120, cwd=target, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         try:
             data = json.loads(r.stdout)
             vulns = data.get("vulnerabilities", {})
@@ -2597,7 +2603,7 @@ def semgrep_scan_tool(target: str) -> str:
     
     for cmd in configs:
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=180, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             try:
                 data = json.loads(r.stdout)
                 findings = data.get("results", [])
@@ -2654,7 +2660,7 @@ def semgrep_scan_tool(target: str) -> str:
         r = subprocess.run(
             f"find {target} -type f \\( -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.js' -o -name '*.ts' \\) -exec grep -l '{pattern}' {{}} \\; 2>/dev/null | head -5",
             shell=True, capture_output=True, text=True, timeout=30
-        )
+        , encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r.stdout.strip():
             files = len(r.stdout.strip().split('\n'))
             result += f"  ⚠️ [{lang}] {desc}: {files} filer\n"
@@ -2693,7 +2699,7 @@ def exploit_verify_tool(target: str) -> str:
     if vuln_type in ("xss", "cross-site scripting"):
         for payload in ['<script>alert(1)</script>', '"><img src=x onerror=alert(1)>', "'-alert(1)-'"]:
             test_url = target_url + "?q=" + payload if "?" not in target_url else target_url + payload
-            r = subprocess.run(["curl", "-sk", test_url], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", test_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             if payload in r.stdout:
                 result += "  [CONFIRMED] XSS - payload reflected!\n"
                 result += "  Reproduction: curl -sk '" + test_url + "'\n"
@@ -2704,7 +2710,7 @@ def exploit_verify_tool(target: str) -> str:
         for internal in ["http://169.254.169.254/latest/meta-data/", "http://metadata.google.internal/"]:
             param = attack_vector or "url"
             test_url = target_url + "?" + param + "=" + internal
-            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", test_url], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", test_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             cs = r.stdout.strip()
             if cs and not cs.startswith("0:0") and cs.startswith("2"):
                 result += "  [CONFIRMED] POTENTIALLY EXPLOITABLE - " + internal + " -> " + cs + "\n"
@@ -2714,13 +2720,13 @@ def exploit_verify_tool(target: str) -> str:
     elif vuln_type in ("idor",):
         for test_id in ["1", "2", "3", "100"]:
             url = target_url.replace("{ID}", test_id) if "{ID}" in target_url else target_url + "/" + test_id
-            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", url], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             result += "  ID=" + test_id + ": " + r.stdout.strip() + "\n"
         result += "  [UNVERIFIED] Check if different IDs return different sizes = IDOR\n"
     
     elif vuln_type in ("rce", "command injection"):
         for payload in ["; id", "| id", "$(id)", "`id`"]:
-            r = subprocess.run(["curl", "-sk", target_url + "?cmd=" + payload], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", target_url + "?cmd=" + payload], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             if "uid=" in r.stdout:
                 result += "  [CONFIRMED] RCE - id output found!\n"
                 result += "  Reproduction: curl -sk '" + target_url + "?cmd=" + payload + "'\n"
@@ -2733,8 +2739,8 @@ def exploit_verify_tool(target: str) -> str:
         result += "\n=== CORS VERIFICATION PROTOCOL ===\n"
         
         # Step 1: Check if ACAO reflects arbitrary origin
-        r1 = subprocess.run(["curl", "-sk", "-H", "Origin: " + evil_origin, "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15)
-        r1_headers = subprocess.run(["curl", "-skI", "-H", "Origin: " + evil_origin, target_url], capture_output=True, text=True, timeout=15)
+        r1 = subprocess.run(["curl", "-sk", "-H", "Origin: " + evil_origin, "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
+        r1_headers = subprocess.run(["curl", "-skI", "-H", "Origin: " + evil_origin, target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         status_code = r1.stdout.strip()
         headers = r1_headers.stdout.lower()
         
@@ -2748,7 +2754,7 @@ def exploit_verify_tool(target: str) -> str:
         result += "  ACAC (credentials): " + str(has_creds) + "\n"
         
         # Step 2: Check with null origin
-        r2 = subprocess.run(["curl", "-skI", "-H", "Origin: null", target_url], capture_output=True, text=True, timeout=15)
+        r2 = subprocess.run(["curl", "-skI", "-H", "Origin: null", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         null_reflects = "null" in r2.stdout.lower() if "access-control-allow-origin" in r2.stdout.lower() else False
         
         # Step 3: CRITICAL - Can AUTHENTICATED data be exfiltrated?
@@ -2756,9 +2762,9 @@ def exploit_verify_tool(target: str) -> str:
         result += "\nStep 2 - Auth Mechanism Check:\n"
         
         # Test without any auth
-        r3 = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15)
+        r3 = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         unauth_size = len(r3.stdout)
-        unauth_code = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15).stdout.strip()
+        unauth_code = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV).stdout.strip()
         
         # Check for auth indicators
         auth_indicators = []
@@ -2815,11 +2821,11 @@ def exploit_verify_tool(target: str) -> str:
         result += "\n=== AUTH BYPASS VERIFICATION ===\n"
         
         # Test 1: No auth
-        r1 = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+        r1 = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result += "  No auth: " + r1.stdout.strip() + "\n"
         
         # Test 2: Bearer with fake token
-        r2 = subprocess.run(["curl", "-sk", "-H", "Authorization: Bearer fake_token_12345", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+        r2 = subprocess.run(["curl", "-sk", "-H", "Authorization: Bearer fake_token_12345", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result += "  Fake Bearer: " + r2.stdout.strip() + "\n"
         
         # Test 3: Common auth bypass headers
@@ -2830,7 +2836,7 @@ def exploit_verify_tool(target: str) -> str:
         ]
         for header_name, header_val in bypass_headers:
             if header_val:
-                r = subprocess.run(["curl", "-sk", "-H", header_name + ": " + header_val, "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+                r = subprocess.run(["curl", "-sk", "-H", header_name + ": " + header_val, "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 result += "  " + header_name + ": " + r.stdout.strip() + "\n"
         
         # Test 4: Path traversal auth bypass
@@ -2841,7 +2847,7 @@ def exploit_verify_tool(target: str) -> str:
         ]
         for bp in bypass_paths:
             if bp.startswith("http"):
-                r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", bp], capture_output=True, text=True, timeout=15)
+                r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", bp], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 result += "  Bypass " + bp[:60] + ": " + r.stdout.strip() + "\n"
         
         result += "\n  Compare responses: different sizes = possible auth bypass\n"
@@ -2852,7 +2858,7 @@ def exploit_verify_tool(target: str) -> str:
         cookie_name = evidence or ""
         
         # Get response headers to find cookie details
-        r = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         headers = r.stdout
         
         # Find Set-Cookie headers
@@ -2879,14 +2885,14 @@ def exploit_verify_tool(target: str) -> str:
         if cookie_name:
             result += "\n  Testing cookie '" + cookie_name + "' for auth...\n"
             # Without cookie
-            r1 = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+            r1 = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             # With fake cookie value
-            r2 = subprocess.run(["curl", "-sk", "-b", cookie_name + "=fake_session_value", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+            r2 = subprocess.run(["curl", "-sk", "-b", cookie_name + "=fake_session_value", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             result += "  Without cookie: " + r1.stdout.strip() + "\n"
             result += "  With fake cookie: " + r2.stdout.strip() + "\n"
             
             # KEY CHECK: Does the API also need a Bearer token?
-            r3 = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15)
+            r3 = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             if "www-authenticate" in r3.stdout.lower() or "bearer" in r3.stdout.lower():
                 result += "\n  [DOWNGRADED] API uses Bearer authentication — cookies are NOT the auth mechanism.\n"
                 result += "  Cookie hijacking alone CANNOT access data — needs valid API key (sk_live_*/Bearer token).\n"
@@ -2919,7 +2925,7 @@ def exploit_verify_tool(target: str) -> str:
                 result += "  [FEJL] Could not decode JWT: " + str(e)[:100] + "\n"
         else:
             # Fetch JWT from endpoint
-            r = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             import json as _json
             try:
                 data = _json.loads(r.stdout)
@@ -2931,7 +2937,7 @@ def exploit_verify_tool(target: str) -> str:
                     result += "  [UNVERIFIED] Cannot test JWT without a token\n"
             except:
                 result += "  Response is not JSON. Checking headers...\n"
-                r2 = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15)
+                r2 = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                 if "bearer" in r2.stdout.lower() or "authorization" in r2.stdout.lower():
                     result += "  Auth required but no JWT provided\n"
                     result += "  [UNVERIFIED] Need valid credentials to test JWT\n"
@@ -2945,7 +2951,7 @@ def exploit_verify_tool(target: str) -> str:
         # Check if API key is actually exposed and usable
         result += "\n=== API KEY EXPOSURE VERIFICATION ===\n"
         
-        r = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["curl", "-sk", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         import re as _re
         # Common API key patterns
         key_patterns = [
@@ -2970,7 +2976,7 @@ def exploit_verify_tool(target: str) -> str:
                 result += "  [CONFIRMED] " + key_type + " found: " + masked + "\n"
                 # Try to verify key is active
                 if key_type.startswith("Stripe secret"):
-                    r2 = subprocess.run(["curl", "-sk", "-u", key_val + ":", "https://api.stripe.com/v1/balance"], capture_output=True, text=True, timeout=15)
+                    r2 = subprocess.run(["curl", "-sk", "-u", key_val + ":", "https://api.stripe.com/v1/balance"], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
                     if "live" in r2.stdout.lower() or "available" in r2.stdout.lower():
                         result += "    KEY IS LIVE! Can access Stripe account data.\n"
                         result += "    [CONFIRMED] CRITICAL — live Stripe key with full access\n"
@@ -2996,7 +3002,7 @@ def exploit_verify_tool(target: str) -> str:
                 test_url = target_url + "&redirect=" + payload
             else:
                 test_url = target_url + "?redirect=" + payload
-            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{redirect_url}:%{http_code}", test_url], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{redirect_url}:%{http_code}", test_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             redirect_url, status = r.stdout.strip().split(":") if ":" in r.stdout.strip() else (r.stdout.strip(), "")
             if "evil.com" in redirect_url.lower():
                 result += "  [CONFIRMED] Open redirect to: " + redirect_url + "\n"
@@ -3007,7 +3013,7 @@ def exploit_verify_tool(target: str) -> str:
     elif vuln_type in ("csrf", "cross-site request forgery"):
         # Verify if CSRF protection exists
         result += "\n=== CSRF VERIFICATION ===\n"
-        r = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["curl", "-skI", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         headers = r.stdout.lower()
         
         csrf_indicators = []
@@ -3019,7 +3025,7 @@ def exploit_verify_tool(target: str) -> str:
             result += "  [DOWNGRADED] No SameSite cookie attribute — CSRF possible\n"
         
         # Test POST without CSRF token
-        r2 = subprocess.run(["curl", "-sk", "-X", "POST", "-H", "Content-Type: application/json", "-d", '{"test":"csrf_verify"}', "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15)
+        r2 = subprocess.run(["curl", "-sk", "-X", "POST", "-H", "Content-Type: application/json", "-d", '{"test":"csrf_verify"}', "-o", "/dev/null", "-w", "%{http_code}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         if r2.stdout.strip() in ("200", "201", "204"):
             result += "  POST accepted without CSRF token: HTTP " + r2.stdout.strip() + "\n"
             result += "  [CONFIRMED] CSRF vulnerability — state-changing request accepted\n"
@@ -3040,7 +3046,7 @@ def exploit_verify_tool(target: str) -> str:
         base = target_url.rstrip("/")
         found = []
         for path in sensitive_paths:
-            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base + path], capture_output=True, text=True, timeout=10)
+            r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base + path], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             code, size = r.stdout.strip().split(":") if ":" in r.stdout.strip() else ("0", "0")
             if code in ("200", "301", "302") and int(size) > 0:
                 found.append((path, code, size))
@@ -3051,7 +3057,7 @@ def exploit_verify_tool(target: str) -> str:
     
     else:
         # Generic verification fallback
-        r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15)
+        r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", target_url], capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result += "  Response: " + r.stdout.strip() + "\n"
         result += "  [UNVERIFIED] Unknown vuln type '" + vuln_type + "' — manual verification needed\n"
     
@@ -3068,8 +3074,8 @@ def webhook_fuzzer_tool(target: str) -> str:
     result = "[WEBHOOK FUZZER: " + base_url + "]\n"
     found = []
     for ep in endpoints:
-        get_r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base_url + ep], capture_output=True, text=True, timeout=10)
-        post_r = subprocess.run(["curl", "-sk", "-X", "POST", "-H", "Content-Type: application/json", "-d", '{"event":"bounced","email":"fuzz@test.com"}', "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base_url + ep], capture_output=True, text=True, timeout=10)
+        get_r = subprocess.run(["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base_url + ep], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
+        post_r = subprocess.run(["curl", "-sk", "-X", "POST", "-H", "Content-Type: application/json", "-d", '{"event":"bounced","email":"fuzz@test.com"}', "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", base_url + ep], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         gc = get_r.stdout.strip().split(":")[0]
         pc = post_r.stdout.strip().split(":")[0]
         if gc != "404" or pc != "404":
@@ -3108,7 +3114,7 @@ def idor_tester_tool(target: str) -> str:
     for url in test_urls:
         cmd = ["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}:%{size_download}", url] + headers
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             code_size = r.stdout.strip()
             # Flag interesting responses
             if ":" in code_size:
@@ -3136,7 +3142,7 @@ def race_condition_tester_tool(target: str) -> str:
     if auth_token:
         cmd += ' -H "Authorization: Bearer ' + auth_token + '"'
     cmd += ' -o /dev/null -w "%{http_code}:%{size_download}\\n" ' + url + " & done; wait"
-    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
     counts = {}
     for line in r.stdout.strip().split(chr(10)):
         if line.strip():
@@ -3408,7 +3414,7 @@ TOOLS: Dict[str, Dict[str, Any]] = {
     "frida_apps":{"func": lambda t: _run_cli(f". {_project_venv_activate()} && frida-ps -Uai 2>&1 | head -60", 15), "desc": "List installed apps on Android device via Frida....", "cat": "mobile"},
     "frida_spawn":{"func": lambda t: _run_cli(f". {_project_venv_activate()} && frida -U -f {t.strip()} 2>&1 | head -50", 30), "desc": "Spawn app with Frida on Android. Input: package_name", "cat": "mobile"},
     "frida_trace":{"func": lambda t: _run_cli(f". {_project_venv_activate()} && frida-trace -U {t.strip()} 2>&1 | head -50", 30), "desc": "Trace function calls on Android app. Input: 'package_name function_pattern'", "cat": "mobile"},
-    "apk_analyze":{"func": lambda t: _run_cli(f". {_project_venv_activate()} && {_project_venv_python()} -c \"import subprocess; r=subprocess.run(['apktool','d',{t.strip()},'-o','/tmp/apk_analysis'],capture_output=True,text=True); print(r.stdout[:3000] if r.stdout else r.stderr[:500])\"", 60), "desc": "Analyze APK — decompile, check permissions, find secrets. Input: path/to/app.apk", "cat": "mobile"},
+    "apk_analyze":{"func": lambda t: _run_cli(f". {_project_venv_activate()} && {_project_venv_python()} -c \"import subprocess; r=subprocess.run(['apktool','d',{t.strip()},'-o','/tmp/apk_analysis'],capture_output=True,text=True, encoding='utf-8', errors='replace', env=_UTF8_ENV); print(r.stdout[:3000] if r.stdout else r.stderr[:500])\"", 60), "desc": "Analyze APK — decompile, check permissions, find secrets. Input: path/to/app.apk", "cat": "mobile"},
     "grapheneos_check":{"func": lambda t: _grapheneos_check(t.strip()), "desc": "Check GrapheneOS security posture — verify device setting...", "cat": "mobile"},
 
     # ── RAG KNOWLEDGE BASE ──────────────────────────────────
@@ -4194,7 +4200,7 @@ def aircrack(target: str) -> str:
             return "[INFO] Aircrack-ng WiFi cracking. Brug: aircrack-ng capture_file [wordlist]. Capture med wifi_scan_detailed foerst."
         wordlist = parts[1] if len(parts) > 1 else "/usr/share/wordlists/rockyou.txt"
         r = subprocess.run(["sudo", "aircrack-ng", cap_file, "-w", wordlist],
-                          capture_output=True, text=True, timeout=90)
+                          capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Aircrack tog for lang tid"
@@ -4214,7 +4220,7 @@ def _bb_hunter(domain: str) -> str:
     # Helper to run a command with a short timeout and swallow errors
     def _run(cmd: list, timeout: int = 30) -> str:
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             return r.stdout or r.stderr or ""
         except Exception as e:
             return f"[timeout/error: {e}]"
@@ -4309,7 +4315,7 @@ def _responder_real(target: str) -> str:
         iface = target.strip() or "eth0"
         # -r flag findes ikke i nyere Responder versioner — fjernet
         r = subprocess.run(["sudo", "responder", "-I", iface, "-w", "-d"],
-                          capture_output=True, text=True, timeout=30)
+                          capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         output = ""
         if r.stdout:
             output += r.stdout[:3000]
@@ -4325,7 +4331,7 @@ def enum4linux_scan(target: str) -> str:
     """Enum4linux SMB/Samba enumeration. Input: target IP"""
     try:
         r = subprocess.run(["enum4linux", "-a", target.strip()],
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:500]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -4344,11 +4350,11 @@ def smb_enum(target: str) -> str:
             # List specific share
             share = parts[1]
             r = subprocess.run(["smbclient", f"//{host}/{share}", "-N", "-c", "ls"],
-                              capture_output=True, text=True, timeout=30)
+                              capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         else:
             # List all shares
             r = subprocess.run(["smbclient", "-L", f"//{host}", "-N"],
-                              capture_output=True, text=True, timeout=30)
+                              capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] SMB enumeration tog for lang tid"
@@ -4364,7 +4370,7 @@ def crackmapexec_scan(target: str) -> str:
         if not host:
             return "[FEJL] Angiv protocol og target (fx 'smb 10.0.0.1' eller 'winrm 10.0.0.1 -u admin -p pass')"
         cmd = ["crackmapexec", proto, host] + parts[2:]
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] CrackMapExec tog for lang tid"
@@ -4376,9 +4382,9 @@ def priv_esc(target: str) -> str:
     try:
         os_type = target.strip().lower()
         if os_type.startswith("win"):
-            r = subprocess.run(["winpeas"], capture_output=True, text=True, timeout=60)
+            r = subprocess.run(["winpeas"], capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         else:
-            r = subprocess.run(["linpeas"], capture_output=True, text=True, timeout=60)
+            r = subprocess.run(["linpeas"], capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Privilege escalation scan tog for lang tid"
@@ -4388,7 +4394,7 @@ def priv_esc(target: str) -> str:
 def binwalk_scan(target: str) -> str:
     """Binwalk firmware analysis and extraction. Input: file path"""
     try:
-        r = subprocess.run(["binwalk", target.strip()], capture_output=True, text=True, timeout=60)
+        r = subprocess.run(["binwalk", target.strip()], capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Binwalk tog for lang tid"
@@ -4401,7 +4407,7 @@ def radare2_analysis(target: str) -> str:
         if target.strip() in ("-h", "help", ""):
             return "[INFO] Radare2 reverse engineering. Input: filsti. Analyserer binaries."
         r = subprocess.run(["r2", "-q", "-c", "aaa; iI; ii; iS", target.strip()],
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Radare2 analyse tog for lang tid"
@@ -4417,7 +4423,7 @@ def masscan_scan(target: str) -> str:
         if not host:
             return "[FEJL] Angiv target (fx '10.0.0.0/24 1000')"
         r = subprocess.run(["sudo", "masscan", host, "-p", "1-65535", "--rate", rate, "--open-only", "--wait", "0"],
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Masscan tog for lang tid"
@@ -4433,7 +4439,7 @@ def ffuf_scan(target: str) -> str:
         if not url:
             return "[FEJL] Angiv URL med FUZZ parameter (fx 'http://target/FUZZ')"
         r = subprocess.run(["ffuf", "-u", url, "-w", wordlist, "-mc", "200,301,302,403"],
-                          capture_output=True, text=True, timeout=90)
+                          capture_output=True, text=True, timeout=90, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         result = r.stdout[:3000] if r.stdout else r.stderr[:500]
         return result if result else "[INGEN RESULTATER]"
     except subprocess.TimeoutExpired:
@@ -4447,13 +4453,13 @@ def netcat_tool(target: str) -> str:
         parts = target.strip().split()
         if "-l" in parts or "listen" in target.lower():
             # Listen mode
-            r = subprocess.run(["nc"] + parts, capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["nc"] + parts, capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         else:
             # Connect mode
             host = parts[0] if parts else ""
             port = parts[1] if len(parts) > 1 else "80"
             r = subprocess.run(["nc", "-zv", "-w", "3", host, port],
-                              capture_output=True, text=True, timeout=15)
+                              capture_output=True, text=True, timeout=15, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:2000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Netcat timeout"
@@ -4468,14 +4474,14 @@ def tcpdump_capture(target: str) -> str:
         count = parts[1] if len(parts) > 1 else "50"
         # Find interface from IP if needed
         if iface.count('.') == 3:
-            r = subprocess.run(["ip", "route", "get", iface], capture_output=True, text=True, timeout=5)
+            r = subprocess.run(["ip", "route", "get", iface], capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             for word in r.stdout.split():
                 if word == "dev":
                     idx = r.stdout.split().index("dev")
                     iface = r.stdout.split()[idx + 1]
                     break
         r = subprocess.run(["sudo", "tcpdump", "-i", iface, "-c", count, "-nn"],
-                          capture_output=True, text=True, timeout=30)
+                          capture_output=True, text=True, timeout=30, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         return r.stdout[:3000] if r.stdout else r.stderr[:500]
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Tcpdump tog for lang tid"
@@ -4931,7 +4937,7 @@ def _fast_vuln_scan(target: str) -> str:
     
     # Security headers check
     try:
-        r = subprocess.run(["curl","-skI",base], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["curl","-skI",base], capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         for h, d in [("x-frame-options","clickjacking"),("x-content-type-options","MIME sniffing"),
                      ("content-security-policy","XSS"),("strict-transport-security","HTTPS"),
                      ("permissions-policy","browser features")]:
@@ -4947,7 +4953,7 @@ def _fast_vuln_scan(target: str) -> str:
                  "/backup.sql","/wp-config.php","/config.php","/.DS_Store"]:
         try:
             r = subprocess.run(["curl","-sk","-o","/dev/null","-w",f"%{{http_code}}:%{{size_download}}",f"{base}{path}"],
-                              capture_output=True, text=True, timeout=5)
+                              capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace', env=_UTF8_ENV)
             cs = r.stdout.strip()
             if ":" in cs:
                 code, size = cs.split(":",1)
@@ -4960,7 +4966,7 @@ def _fast_vuln_scan(target: str) -> str:
     # CORS check
     try:
         r = subprocess.run(["curl","-sk","-H","Origin: https://evil.com","-I",base],
-                          capture_output=True, text=True, timeout=10)
+                          capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace', env=_UTF8_ENV)
         acao = [l for l in r.stdout.split("\n") if "access-control-allow-origin" in l.lower()]
         acac = [l for l in r.stdout.split("\n") if "access-control-allow-credentials" in l.lower()]
         if acao and "evil.com" in acao[0].lower():
