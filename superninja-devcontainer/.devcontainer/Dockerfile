@@ -251,23 +251,8 @@ RUN echo 'export PS1="\[\033[01;32m\]🥷 superninja\[\033[00m\]:\[\033[01;34m\]
 # =============================================================================
 # PHASE 8: Supervisor config for Xvfb + VNC (like real sandbox)
 # =============================================================================
-RUN mkdir -p /var/log/supervisor
-COPY <<'EOF' /etc/supervisor/conf.d/superninja.conf
-[supervisord]
-nodaemon=false
-logfile=/var/log/supervisor/supervisord.log
-pidfile=/var/run/supervisord.pid
-
-[program:xvfb]
-command=Xvfb :0 -screen 0 1280x720x24
-autorestart=true
-priority=10
-
-[program:x11vnc]
-command=x11vnc -display :0 -forever -nopw -shared
-autorestart=true
-priority=20
-EOF
+RUN mkdir -p /var/log/supervisor && \
+    echo '[supervisord]\nnodaemon=false\nlogfile=/var/log/supervisor/supervisord.log\npidfile=/var/run/supervisord.pid\n\n[program:xvfb]\ncommand=Xvfb :0 -screen 0 1280x720x24\nautorestart=true\npriority=10\n\n[program:x11vnc]\ncommand=x11vnc -display :0 -forever -nopw -shared\nautorestart=true\npriority=20' > /etc/supervisor/conf.d/superninja.conf
 
 # =============================================================================
 # Health check
