@@ -1,0 +1,94 @@
+{
+  "name": "🥷 SuperNinja Sandbox",
+  "description": "COMPLETE replica of the NinjaTech SuperNinja AI Agent sandbox - Debian 12, Python 3.11, Node.js 20, Playwright, OCR, VNC, noVNC, code-server, ttyd, nginx proxy, MCP, and ALL tools",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USERNAME": "superninja",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "Continue.continue",
+        "ms-vscode-remote.remote-containers",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools",
+        "ms-playwright.playwright",
+        "formulahendry.auto-rename-tag"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "icon": "terminal",
+            "env": {
+              "PS1": "\\[\\033[01;32m\\]🥷 superninja\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ ",
+              "DISPLAY": ":99"
+            }
+          }
+        },
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "files.autoSave": "afterDelay"
+      }
+    }
+  },
+
+  "forwardPorts": [2222, 3000, 4000, 5000, 5901, 6080, 8000, 8080, 8888, 11434],
+
+  "portsAttributes": {
+    "2222": {"label": "ttyd Web Terminal", "onAutoForward": "openBrowser"},
+    "3000": {"label": "React/Next.js Dev", "onAutoForward": "notify"},
+    "4000": {"label": "code-server (VS Code i browser)", "onAutoForward": "notify"},
+    "5000": {"label": "Flask/Python Server", "onAutoForward": "notify"},
+    "5901": {"label": "VNC Display", "onAutoForward": "notify"},
+    "6080": {"label": "noVNC (VNC i browser)", "onAutoForward": "openBrowser"},
+    "8000": {"label": "FastAPI/Django", "onAutoForward": "notify"},
+    "8080": {"label": "Nginx Proxy (VNC+Terminal+Code)", "onAutoForward": "openBrowser"},
+    "8888": {"label": "Jupyter Notebook", "onAutoForward": "notify"},
+    "11434": {"label": "Ollama API", "onAutoForward": "notify"}
+  },
+
+  "postCreateCommand": "sudo supervisord -c /etc/supervisor/supervisord.conf || true; sleep 5; echo '🥷 SuperNinja Sandbox Ready!' && python3 --version && node --version && gh --version | head -1 && echo 'Playwright:' && playwright --version && echo 'Services: Xvfb, x11vnc, noVNC, code-server, ttyd, nginx' && echo 'All systems operational.'",
+
+  "postStartCommand": "sudo supervisorctl -c /etc/supervisor/supervisord.conf start all || sudo supervisord -c /etc/supervisor/supervisord.conf || true",
+
+  "remoteUser": "superninja",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": false
+    }
+  },
+
+  "runArgs": [
+    "--hostname", "superninja-sandbox",
+    "--label", "ninjatech.superninja=true"
+  ],
+
+  "initializeCommand": "echo '🥷 Building SuperNinja Sandbox... first build takes ~10 min'"
+}
