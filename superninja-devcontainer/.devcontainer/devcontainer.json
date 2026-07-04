@@ -1,0 +1,76 @@
+{
+  "name": "🥷 SuperNinja Sandbox",
+  "description": "Full SuperNinja AI Agent development environment - Debian 12, Python 3.11, Node.js 20, and all tools",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USERNAME": "superninja",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "Continue.continue",
+        "ms-vscode-remote.remote-containers",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "cweijan.vscode-postgresql-client2",
+        "mtxr.sqltools",
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "icon": "terminal",
+            "env": {
+              "PS1": "\\[\\033[01;32m\\]🥷 superninja\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
+            }
+          }
+        },
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "files.autoSave": "afterDelay"
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 5000, 8000, 8080, 11434],
+
+  "postCreateCommand": "echo '🥷 SuperNinja Sandbox Ready!' && python3 --version && node --version && echo 'All systems operational.'",
+
+  "remoteUser": "superninja",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": false
+    }
+  },
+
+  "runArgs": [
+    "--hostname", "superninja-sandbox",
+    "--label", "ninjatech.superninja=true"
+  ]
+}
