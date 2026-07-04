@@ -1,6 +1,6 @@
 {
   "name": "🥷 SuperNinja Sandbox",
-  "description": "Full SuperNinja AI Agent development environment - Debian 12, Python 3.11, Node.js 20, and all tools",
+  "description": "FULL replica of the NinjaTech SuperNinja AI Agent sandbox - Debian 12, Python 3.11, Node.js 20, Playwright, OCR, VNC, and ALL tools",
   "build": {
     "dockerfile": "Dockerfile",
     "args": {
@@ -29,9 +29,11 @@
         "shd101wyy.markdown-preview-enhanced",
         "charliermarsh.ruff",
         "ms-azuretools.vscode-docker",
-        "cweijan.vscode-postgresql-client2",
         "mtxr.sqltools",
-        "rust-lang.rust-analyzer"
+        "rust-lang.rust-analyzer",
+        "ms-playwright.playwright",
+        "formulahendry.auto-rename-tag",
+        "wakatime.vscode-wakatime"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python3",
@@ -42,7 +44,8 @@
             "path": "/bin/bash",
             "icon": "terminal",
             "env": {
-              "PS1": "\\[\\033[01;32m\\]🥷 superninja\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
+              "PS1": "\\[\\033[01;32m\\]🥷 superninja\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ ",
+              "DISPLAY": ":0"
             }
           }
         },
@@ -53,9 +56,21 @@
     }
   },
 
-  "forwardPorts": [3000, 5000, 8000, 8080, 11434],
+  "forwardPorts": [3000, 5000, 5900, 8000, 8080, 11434, 8888],
 
-  "postCreateCommand": "echo '🥷 SuperNinja Sandbox Ready!' && python3 --version && node --version && echo 'All systems operational.'",
+  "portsAttributes": {
+    "3000": {"label": "React/Next.js", "onAutoForward": "notify"},
+    "5000": {"label": "Flask/Python", "onAutoForward": "notify"},
+    "5900": {"label": "VNC Display", "onAutoForward": "notify"},
+    "8000": {"label": "FastAPI/Django", "onAutoForward": "notify"},
+    "8080": {"label": "Node.js Server", "onAutoForward": "notify"},
+    "11434": {"label": "Ollama API", "onAutoForward": "notify"},
+    "8888": {"label": "Jupyter", "onAutoForward": "notify"}
+  },
+
+  "postCreateCommand": "sudo service supervisor start 2>/dev/null; echo '🥷 SuperNinja Sandbox Ready!' && python3 --version && node --version && gh --version | head -1 && echo 'Playwright:' && playwright --version && echo 'All systems operational.'",
+
+  "postStartCommand": "sudo service supervisor start 2>/dev/null || true",
 
   "remoteUser": "superninja",
 
